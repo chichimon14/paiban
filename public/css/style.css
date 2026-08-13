@@ -302,15 +302,36 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
+  margin-bottom: 20px;
 }
 
 .card-header {
   padding: 16px 24px;
+  background-color: #ffffff;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subtitle-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
 }
 
 .card-body.p-0 {
   padding: 0 !important;
   flex: 1;
+}
+
+.card-body-padded {
+  padding: 24px 28px !important;
 }
 
 .flex-between-center {
@@ -415,6 +436,7 @@ body {
 
 .tag-work { background: #ffffff; border: 1px solid #cbd5e1; color: #64748b; }
 .tag-lun { background: #dcfce7; border: 1px solid #86efac; color: #15803d; font-weight: 700; }
+.tag-auto { background: #dbeafe; border: 1px solid #93c5fd; color: #1d4ed8; font-weight: 700; }
 .tag-jia { background: #fee2e2; border: 1px solid #fca5a5; color: #b91c1c; font-weight: 700; }
 
 .counter-chip {
@@ -426,7 +448,7 @@ body {
 }
 
 /* -------------------------------------------------------------
-// 大屏表格 (舒展拉宽，充盈屏幕)
+// 大屏表格
 // ------------------------------------------------------------- */
 .table-responsive-wrapper {
   overflow-x: auto;
@@ -442,7 +464,6 @@ body {
   table-layout: auto;
 }
 
-/* 🌟 行高由 44px 拉宽调高至 52px，舒展大气不紧凑 */
 .schedule-matrix-table th,
 .schedule-matrix-table td {
   border: 1px solid var(--border-color);
@@ -463,7 +484,6 @@ body {
   padding: 10px 4px;
 }
 
-/* 第一列【成员姓名 / 岗位】高度与宽敞度升级 */
 .schedule-matrix-table .sticky-col {
   position: sticky;
   left: 0;
@@ -492,7 +512,6 @@ body {
   font-family: 'Outfit', -apple-system, sans-serif;
 }
 
-/* 胶囊状高级感职务 Badge */
 .role-tag-xs {
   font-size: 11.5px;
   padding: 2.5px 8px;
@@ -508,7 +527,6 @@ body {
 .role-tag-xs.group-a { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
 .role-tag-xs.group-b { background: #fff7ed; color: #c2410c; border-color: #ffedd5; }
 
-/* 🌟 用户划假时整行高亮 (Current User Row Highlight) */
 tr.current-user-row td {
   background-color: #f0f9ff !important;
 }
@@ -532,12 +550,10 @@ tr.current-user-row .user-name-bold {
   font-weight: 600;
 }
 
-/* 表格悬停整行反馈 */
 .schedule-matrix-table tbody tr:hover td {
   background-color: #f1f5f9;
 }
 
-/* 单元格状态样式 */
 .cell-state-work {
   background-color: #ffffff;
 }
@@ -549,6 +565,13 @@ tr.current-user-row .user-name-bold {
   font-size: 17px;
 }
 
+.cell-state-auto {
+  background-color: #dbeafe !important;
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 17px;
+}
+
 .cell-state-jia {
   background-color: #fee2e2 !important;
   color: #b91c1c;
@@ -556,7 +579,6 @@ tr.current-user-row .user-name-bold {
   font-size: 14px;
 }
 
-/* 单元格下拉框放大舒展 */
 .cell-select-dropdown {
   width: 100%;
   height: 36px;
@@ -575,13 +597,18 @@ tr.current-user-row .user-name-bold {
   border-color: #86efac;
 }
 
+.cell-select-dropdown.state-auto {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
 .cell-select-dropdown.state-jia {
   background-color: #fee2e2;
   color: #b91c1c;
   border-color: #fca5a5;
 }
 
-/* 表脚统计行 */
 .foot-stat-row td {
   font-weight: 600;
   font-size: 13px;
@@ -610,12 +637,87 @@ tr.current-user-row .user-name-bold {
   font-weight: 700;
 }
 
-/* Card Footer 放大 */
 .card-footer {
   padding: 14px 24px;
   background-color: #ffffff;
   border-top: 1px solid var(--border-color);
   font-size: 13px;
+}
+
+/* -------------------------------------------------------------
+// 人员名册与密码管理 (🌟 按钮齐平与靠左完美对齐)
+// ------------------------------------------------------------- */
+.border-rounded {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.styled-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+}
+
+.styled-users-table thead th {
+  background-color: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  padding: 14px 20px;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.styled-users-table tbody td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.styled-users-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.styled-users-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* 🌟 人员操作列按钮容器 - 左对齐绝对排齐 */
+.user-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.form-control-styled {
+  height: 38px;
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.15s ease;
+  background: white;
+}
+
+.form-control-styled:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-row-inline {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.form-group-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* -------------------------------------------------------------
@@ -630,18 +732,21 @@ tr.current-user-row .user-name-bold {
   flex: 1;
   background: #f8fafc;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 10px;
+  padding: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  opacity: 0.6;
+  opacity: 0.75;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
 }
 
 .step-card.active {
   opacity: 1;
   background: #eff6ff;
   border-color: #93c5fd;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
 .step-card.completed {
@@ -651,8 +756,8 @@ tr.current-user-row .user-name-bold {
 }
 
 .step-num {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #cbd5e1;
   color: white;
@@ -671,8 +776,8 @@ tr.current-user-row .user-name-bold {
   flex-direction: column;
 }
 
-.step-name { font-size: 14px; font-weight: 600; }
-.step-desc { font-size: 11.5px; color: var(--text-muted); }
+.step-name { font-size: 14.5px; font-weight: 700; color: #0f172a; }
+.step-desc { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
 
 /* -------------------------------------------------------------
 // 按钮与通用样式
@@ -693,6 +798,7 @@ tr.current-user-row .user-name-bold {
 }
 
 .btn-sm { padding: 5px 12px; font-size: 12.5px; }
+.btn-md { padding: 8px 18px; font-size: 14px; font-weight: 600; }
 .btn-lg { padding: 12px 20px; font-size: 16px; font-weight: 600; }
 
 .btn-primary { background: var(--primary-color); color: white; }

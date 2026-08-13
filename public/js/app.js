@@ -149,12 +149,9 @@ function bindEvents() {
   document.getElementById('btnAddUserModal').addEventListener('click', () => openUserModal());
   document.getElementById('userModalForm').addEventListener('submit', handleSaveUserModal);
 
-  // 导出与打印
+  // 导出 CSV
   const btnExport = document.getElementById('btnExportCSV');
   if (btnExport) btnExport.addEventListener('click', exportToCSV);
-
-  const btnPrint = document.getElementById('btnPrintSchedule');
-  if (btnPrint) btnPrint.addEventListener('click', () => window.print());
 }
 
 function updateLargeFontBtnUI() {
@@ -180,7 +177,6 @@ function switchPage(pageId) {
   if (targetNavBtn) targetNavBtn.classList.add('active');
 }
 
-// 支持单按钮与双按钮交互的正中央警示弹窗
 function showCenterAlert(title, message, isConfirmDialog = false, onConfirm = null) {
   document.getElementById('centerAlertTitle').textContent = title;
   document.getElementById('centerAlertMessage').textContent = message;
@@ -270,7 +266,7 @@ function showMainContent() {
 
   let roleLabel = '普通干部';
   if (currentUser.role === 'admin') roleLabel = '系统管理员';
-  else if (currentUser.role === 'leader_main') roleLabel = '正科长';
+  else if (currentUser.role === 'leader_main') roleLabel = '正科长 (最高优先排位)';
   else if (currentUser.role === 'leader_sub') roleLabel = `副科长 (${currentUser.group}组)`;
   else if (currentUser.group) roleLabel = `干部 (${currentUser.group}组)`;
 
@@ -406,16 +402,16 @@ function renderStageFlow() {
   } else {
     switch (currentStage) {
       case 1:
-        alertTextEl.textContent = '阶段 1 [姚惠安(正科长)优先填报]：第1轮限时1天。若错过降至第3轮。';
+        alertTextEl.textContent = '阶段 1 [姚惠安(正科长)最高优先填报]：第1轮限时1天，正科长优先挑选。';
         break;
       case 2:
-        alertTextEl.textContent = `阶段 2 [优先组 (${priorityGroup}组) 填报]：第2轮限时1天，本月${priorityGroup}组优先。若错过降至第3轮。`;
+        alertTextEl.textContent = `阶段 2 [优先组 (${priorityGroup}组) 填报]：第2轮限时1天，本月${priorityGroup}组优先。`;
         break;
       case 3:
-        alertTextEl.textContent = '阶段 3 [普通组填报]：第3轮限时2天，全员开放（错过的成员在此沉降补填）。';
+        alertTextEl.textContent = '阶段 3 [普通组填报]：第3轮限时2天，全员开放（多人同时划假，系统实时监控在岗人数）。';
         break;
       case 4:
-        alertTextEl.textContent = '阶段 4 [系统智能补全]：点击运行智能算法，系统将自动分配剩余轮休(✅)。';
+        alertTextEl.textContent = '阶段 4 [系统智能补全]：点击运行智能算法，系统将自动分配剩余轮休(☑️)。';
         break;
       case 5:
         alertTextEl.textContent = '阶段 5 [管理员微调与发布]：系统已补全，管理员开启微调编辑模式可进行二次调整。';
@@ -491,7 +487,63 @@ async function handleSwitchStageQuick(stage) {
 }
 
 // -------------------------------------------------------------
-// 核心页面 1：月度排班矩阵大屏 (划假高亮与高级感首列)
+// 🌟 实时计算与校验多人排班时是否满足在岗硬性要求 (≥1领导, ≥5在岗)
+// -------------------------------------------------------------
+function checkRealtimeDutyLimits(changingUserId, day, newTargetState) {
+  if (!currentSchedule) return { valid: true };
+
+  const { totalDays, userSelections, finalSchedule } = currentSchedule;
+  const staffUsers = allUsers.filter(u => u.role !== 'admin');
+
+  let nextLeaderCount = 0;
+  let nextTotalCount = 0;
+
+  staffUsers.forEach(u => {
+    let currentState = '班';
+
+    if (currentUser.role === 'admin' && isAdminEditMode) {
+      const uMap = adminTempSchedule[u.id] || {};
+      currentState = uMap[day] || '班';
+    } else if (u.id === currentUser.id) {
+      currentState = tempMemberSelections[day] || '班';
+    } else {
+      const userSel = (userSelections && userSelections[u.id]) || {};
+      const finalSel = (finalSchedule && finalSchedule[u.id]) || {};
+      currentState = userSel[day] || finalSel[day] || '班';
+    }
+
+    if (u.id === changingUserId) {
+      currentState = newTargetState;
+    }
+
+    const isOff = (currentState === '✅' || currentState === '假');
+    if (!isOff) {
+      nextTotalCount++;
+      if (u.role === 'leader_main' || u.role === 'leader_sub') {
+        nextLeaderCount++;
+      }
+    }
+  });
+
+  if (nextLeaderCount < 1) {
+    return {
+      valid: false,
+      reason: `⚠️ 实时在岗约束拦截：${day}日 导致当日在岗领导人数为 0 人（硬性规定 ≥ 1 人在岗！），无法在此日期划假。`
+    };
+  }
+
+  if (nextTotalCount < 5) {
+    return {
+      valid: false,
+      reason: `⚠️ 实时在岗约束拦截：${day}日 导致当日在岗总人数仅为 ${nextTotalCount} 人（硬性规定最低在岗 ≥ 5 人！），无法在此日期划假。`
+    };
+  }
+
+  return { valid: true };
+}
+
+// -------------------------------------------------------------
+// 核心页面 1：月度排班矩阵大屏 (区分自选假与系统补全假)
 // -------------------------------------------------------------
 function renderScheduleMatrix() {
   if (!currentSchedule) return;
@@ -508,11 +560,11 @@ function renderScheduleMatrix() {
 
   if (currentUser.role !== 'admin') {
     if (currentStage === 1) {
-      if (currentUser.role === 'leader_main') canMemberFill = true;
-      else memberWaitReason = `当前为 [第1轮：正科长优先填报阶段]。您所属的岗位将在后续轮次开启，或可使用右上角菜单切换至第3阶段进行体验。`;
+      if (currentUser.role === 'leader_main') canMemberFill = true; // 姚惠安(正科长)最高优先
+      else memberWaitReason = `当前为 [第1轮：姚惠安(正科长)最高优先填报阶段]。您所属的岗位将在后续轮次开启。`;
     } else if (currentStage === 2) {
       if (currentUser.group === priorityGroup) canMemberFill = true;
-      else memberWaitReason = `当前为 [第2轮：优先组 (${priorityGroup}组) 填报阶段]。您属于 ${currentUser.group || '其他'} 组，请等待下一轮全员开放。`;
+      else memberWaitReason = `当前为 [第2轮：优先组 (${priorityGroup}组) 填报阶段]。您属于 ${currentUser.group || 'none'} 组，请等待下一轮全员开放。`;
     } else if (currentStage >= 3) {
       canMemberFill = true;
     }
@@ -558,7 +610,7 @@ function renderScheduleMatrix() {
   staffUsers.forEach(u => {
     const tr = document.createElement('tr');
     
-    // 🌟 用户划假时高亮他这一行 (Row Highlight)
+    // 用户划假时整行高亮 (Row Highlight)
     const isSelfRow = (currentUser.role !== 'admin' && u.id === currentUser.id);
     if (isSelfRow) {
       tr.classList.add('current-user-row');
@@ -579,7 +631,18 @@ function renderScheduleMatrix() {
       </td>
     `;
 
+    // 读取该用户的个人划假提交 userSel 与最终安排 finalSel
+    const userSel = (userSelections && userSelections[u.id]) || {};
+    const finalSel = (finalSchedule && finalSchedule[u.id]) || {};
+
     const userStateMap = {};
+    const isAutoFilledMap = {}; // 记录是否为系统补全假
+
+    for (let d = 1; d <= totalDays; d++) {
+      userStateMap[d] = '班';
+      isAutoFilledMap[d] = false;
+    }
+
     if (currentUser.role === 'admin' && isAdminEditMode) {
       const adminMap = adminTempSchedule[u.id] || {};
       for (let d = 1; d <= totalDays; d++) {
@@ -590,23 +653,20 @@ function renderScheduleMatrix() {
         userStateMap[d] = tempMemberSelections[d] || '班';
       }
     } else {
-      const userSel = (userSelections && userSelections[u.id]) || {};
-      const finalSel = (finalSchedule && finalSchedule[u.id]) || {};
-      const mergedRawData = { ...userSel, ...finalSel };
-
       for (let d = 1; d <= totalDays; d++) {
-        userStateMap[d] = '班';
-      }
+        const selVal = userSel[d];
+        const finalVal = finalSel[d];
 
-      if (Array.isArray(mergedRawData)) {
-        mergedRawData.forEach(item => {
-          if (typeof item === 'number') userStateMap[item] = '✅';
-          else if (item && item.day) userStateMap[item.day] = item.type || '✅';
-        });
-      } else if (typeof mergedRawData === 'object') {
-        Object.keys(mergedRawData).forEach(d => {
-          userStateMap[d] = mergedRawData[d];
-        });
+        if (selVal === '✅' || selVal === '假') {
+          userStateMap[d] = selVal;
+          isAutoFilledMap[d] = false;
+        } else if (finalVal === '✅') {
+          userStateMap[d] = '✅';
+          isAutoFilledMap[d] = true; // 系统智能补全标识
+        } else if (finalVal === '假') {
+          userStateMap[d] = '假';
+          isAutoFilledMap[d] = false;
+        }
       }
     }
 
@@ -614,6 +674,7 @@ function renderScheduleMatrix() {
 
     for (let d = 1; d <= totalDays; d++) {
       const state = userStateMap[d] || '班';
+      const isAuto = isAutoFilledMap[d];
       const isOff = state === '✅' || state === '假';
 
       if (!isOff) {
@@ -624,7 +685,7 @@ function renderScheduleMatrix() {
       // 情况 A: 超级管理员开启微调编辑模式
       if (currentUser.role === 'admin' && isAdminEditMode) {
         let dropdownClass = 'cell-select-dropdown';
-        if (state === '✅') dropdownClass += ' state-lun';
+        if (state === '✅') dropdownClass += isAuto ? ' state-auto' : ' state-lun';
         else if (state === '假') dropdownClass += ' state-jia';
 
         rowHtml += `
@@ -653,12 +714,23 @@ function renderScheduleMatrix() {
           </td>
         `;
       }
-      // 情况 C: 静态只读展示
+      // 情况 C: 静态只读展示 (区分个人自选绿✅ 与 系统补全天蓝☑️)
       else {
         let cellClass = 'cell-state-work';
         let displaySymbol = '';
-        if (state === '✅') { cellClass = 'cell-state-lun'; displaySymbol = '✅'; }
-        else if (state === '假') { cellClass = 'cell-state-jia'; displaySymbol = '假'; }
+
+        if (state === '✅') {
+          if (isAuto) {
+            cellClass = 'cell-state-auto';
+            displaySymbol = '☑️';
+          } else {
+            cellClass = 'cell-state-lun';
+            displaySymbol = '✅';
+          }
+        } else if (state === '假') {
+          cellClass = 'cell-state-jia';
+          displaySymbol = '假';
+        }
 
         rowHtml += `
           <td class="${cellClass}">
@@ -672,6 +744,7 @@ function renderScheduleMatrix() {
     tbody.appendChild(tr);
   });
 
+  // 🌟 普通成员选择划假 - 实时校验在岗硬性要求与上限
   if (currentUser.role !== 'admin' && canMemberFill) {
     tbody.querySelectorAll('.cell-select-dropdown:not(.admin-cell-select)').forEach(select => {
       select.addEventListener('change', (e) => {
@@ -695,18 +768,39 @@ function renderScheduleMatrix() {
           }
         }
 
+        // 🌟 实时校验多人在岗要求 (≥1领导, ≥5总人数)
+        if (val === '✅' || val === '假') {
+          const check = checkRealtimeDutyLimits(currentUser.id, day, val);
+          if (!check.valid) {
+            showCenterAlert('实时在岗人数拦截', check.reason);
+            e.target.value = oldVal;
+            return;
+          }
+        }
+
         tempMemberSelections[day] = val;
         renderScheduleMatrix();
       });
     });
   }
 
+  // 🌟 管理员微调编辑 - 实时校验在岗硬性要求
   if (currentUser.role === 'admin' && isAdminEditMode) {
     tbody.querySelectorAll('.admin-cell-select').forEach(select => {
       select.addEventListener('change', (e) => {
         const userId = e.target.dataset.userid;
         const day = parseInt(e.target.dataset.day, 10);
         const type = e.target.value;
+        const oldVal = (adminTempSchedule[userId] && adminTempSchedule[userId][day]) || '班';
+
+        if (type === '✅' || type === '假') {
+          const check = checkRealtimeDutyLimits(userId, day, type);
+          if (!check.valid) {
+            showCenterAlert('实时在岗人数拦截', check.reason);
+            e.target.value = oldVal;
+            return;
+          }
+        }
 
         if (!adminTempSchedule[userId]) adminTempSchedule[userId] = {};
         if (!type || type === '班' || type.trim() === '') {
@@ -834,7 +928,6 @@ async function handleMemberSubmitSelections() {
     }
   };
 
-  // 🌟 未选满额度时的弹窗提醒
   if (lunCount < maxLimit) {
     const diff = maxLimit - lunCount;
     showCenterAlert(
@@ -1015,7 +1108,7 @@ async function handlePublishSchedule() {
 }
 
 // -------------------------------------------------------------
-// 人员名册管理
+// 人员名册管理 (🌟 修复 admin 编辑按钮齐平对齐)
 // -------------------------------------------------------------
 function renderUsersTable() {
   const tbody = document.getElementById('usersTableBody');
@@ -1029,15 +1122,21 @@ function renderUsersTable() {
     else if (u.role === 'leader_main') roleText = '正科长 (领导)';
     else if (u.role === 'leader_sub') roleText = '副科长 (领导)';
 
+    let groupBadgeClass = 'badge-blue';
+    if (u.group === 'B') groupBadgeClass = 'badge-orange';
+    else if (u.group === 'none') groupBadgeClass = 'badge-admin';
+
     tr.innerHTML = `
       <td><strong>${u.username}</strong></td>
-      <td>${u.name}</td>
+      <td><strong>${u.name}</strong></td>
       <td>${roleText}</td>
-      <td><span class="badge ${u.group === 'A' ? 'badge-blue' : 'badge-orange'}">${u.group} 组</span></td>
-      <td><span class="font-mono text-primary font-bold" style="background:#eff6ff; padding:2px 8px; border-radius:4px; border:1px solid #bfdbfe;">${u.password}</span></td>
-      <td>
-        <button class="btn btn-sm btn-light-ghost" onclick="editUser('${u.id}')"><i class="fa-solid fa-pen"></i> 编辑/重置密码</button>
-        ${u.role !== 'admin' ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}')"><i class="fa-solid fa-trash"></i> 删除</button>` : ''}
+      <td><span class="badge ${groupBadgeClass}">${u.group} 组</span></td>
+      <td><span class="font-mono text-primary font-bold" style="background:#eff6ff; padding:4px 10px; border-radius:6px; border:1px solid #bfdbfe; font-size:14px;">${u.password}</span></td>
+      <td style="text-align: left;">
+        <div class="user-table-actions">
+          <button class="btn btn-sm btn-light-ghost" onclick="editUser('${u.id}')"><i class="fa-solid fa-pen"></i> 编辑/重置密码</button>
+          ${u.role !== 'admin' ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}')"><i class="fa-solid fa-trash"></i> 删除</button>` : ''}
+        </div>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1079,6 +1178,36 @@ async function deleteUser(id) {
   }
 }
 
+async function handleSaveUserModal(e) {
+  e.preventDefault();
+  const id = document.getElementById('modalUserId').value;
+  const username = document.getElementById('modalUsername').value.trim();
+  const name = document.getElementById('modalName').value.trim();
+  const role = document.getElementById('modalRole').value;
+  const group = document.getElementById('modalGroup').value;
+  const password = document.getElementById('modalPassword').value.trim();
+
+  try {
+    const url = id ? `/api/users/${id}` : '/api/users';
+    const method = id ? 'PUT' : 'POST';
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, name, role, group, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      closeUserModal();
+      loadScheduleData();
+    } else {
+      showToast(data.message || '操作失败', 'error');
+    }
+  } catch (err) {
+    showToast('保存失败', 'error');
+  }
+}
+
 // -------------------------------------------------------------
 // 导出 Excel/CSV
 // -------------------------------------------------------------
@@ -1106,24 +1235,22 @@ function exportToCSV() {
 
     const userSel = (userSelections && userSelections[u.id]) || {};
     const finalSel = (finalSchedule && finalSchedule[u.id]) || {};
-    const mergedRawData = { ...userSel, ...finalSel };
 
     const userStateMap = {};
     for (let d = 1; d <= totalDays; d++) userStateMap[d] = ' ';
 
-    if (Array.isArray(mergedRawData)) {
-      mergedRawData.forEach(item => {
-        if (typeof item === 'number') userStateMap[item] = '✅';
-        else if (item && item.day) userStateMap[item.day] = item.type || '✅';
-      });
-    } else if (typeof mergedRawData === 'object') {
-      Object.keys(mergedRawData).forEach(d => {
-        userStateMap[d] = mergedRawData[d];
-      });
+    for (let d = 1; d <= totalDays; d++) {
+      const selVal = userSel[d];
+      const finalVal = finalSel[d];
+
+      if (selVal === '✅') userStateMap[d] = '✅(自选)';
+      else if (finalVal === '✅') userStateMap[d] = '☑️(补全)';
+      else if (selVal === '假' || finalVal === '假') userStateMap[d] = '假';
+      else userStateMap[d] = '上班';
     }
 
     for (let d = 1; d <= totalDays; d++) {
-      rowStr += `,${userStateMap[d] === '✅' || userStateMap[d] === '假' ? userStateMap[d] : '上班'}`;
+      rowStr += `,${userStateMap[d]}`;
     }
     csvContent += rowStr + `\n`;
   });
