@@ -1,5 +1,5 @@
 /* ==========================================================================
-// 科室智能轮休排班系统 - style.css (Light Dynamic Theme - 精美极简 UI 复原)
+// 科室智能轮休排班系统 - style.css (Light Dynamic Premium UI)
 // ========================================================================== */
 
 :root {
@@ -285,7 +285,7 @@ body {
 }
 
 /* -------------------------------------------------------------
-// Card 卡片组件与排班大屏 Banner Header
+// Card 卡片组件
 // ------------------------------------------------------------- */
 .card {
   background: white;
@@ -415,7 +415,7 @@ body {
 }
 
 /* -------------------------------------------------------------
-// 大屏表格 (精美 1:1 复原用户截图的经典 UI)
+// 大屏表格与高级感首列极致升级 (Premium Table & Row Highlight)
 // ------------------------------------------------------------- */
 .table-responsive-wrapper {
   overflow-x: auto;
@@ -435,8 +435,9 @@ body {
 .schedule-matrix-table td {
   border: 1px solid var(--border-color);
   padding: 4px;
-  height: 42px;
+  height: 44px;
   white-space: nowrap;
+  transition: background-color 0.15s ease;
 }
 
 .schedule-matrix-table th {
@@ -447,20 +448,21 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 6px 4px;
+  padding: 8px 4px;
 }
 
-/* 第一列成员姓名 / 岗位吸顶完美精确样式 */
+/* 第一列【成员姓名 / 岗位】高级感微晶质感 */
 .schedule-matrix-table .sticky-col {
   position: sticky;
   left: 0;
-  background-color: #ffffff !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
   z-index: 12;
-  border-right: 1px solid var(--border-color) !important;
+  border-right: 2px solid #cbd5e1 !important;
+  box-shadow: 4px 0 8px -2px rgba(15, 23, 42, 0.05);
   text-align: left !important;
   padding: 8px 12px !important;
-  min-width: 140px;
-  width: 140px;
+  min-width: 145px;
+  width: 145px;
 }
 
 .user-cell-title {
@@ -474,20 +476,54 @@ body {
   font-weight: 700;
   font-size: 14px;
   color: #0f172a;
+  letter-spacing: 0.3px;
+  font-family: 'Outfit', -apple-system, sans-serif;
 }
 
+/* 胶囊状高级感职务 Badge */
 .role-tag-xs {
   font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 7px;
+  border-radius: 6px;
   font-weight: 600;
   line-height: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.role-tag-xs.leader-main { background: #f3e8ff; color: #7e22ce; }
-.role-tag-xs.leader-sub { background: #dbeafe; color: #1d4ed8; }
-.role-tag-xs.group-a { background: #eff6ff; color: #2563eb; }
-.role-tag-xs.group-b { background: #fff7ed; color: #c2410c; }
+.role-tag-xs.leader-main { background: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
+.role-tag-xs.leader-sub { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+.role-tag-xs.group-a { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.role-tag-xs.group-b { background: #fff7ed; color: #c2410c; border-color: #ffedd5; }
+
+/* 🌟 用户划假时整行高亮 (Current User Row Highlight) */
+tr.current-user-row td {
+  background-color: #f0f9ff !important;
+}
+
+tr.current-user-row .sticky-col {
+  background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 100%) !important;
+  border-left: 4px solid var(--primary-color) !important;
+}
+
+tr.current-user-row .user-name-bold {
+  color: #0369a1 !important;
+}
+
+.my-row-badge {
+  font-size: 10px;
+  background: var(--primary-color);
+  color: white;
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-left: 4px;
+  font-weight: 600;
+}
+
+/* 表格悬停整行反馈 */
+.schedule-matrix-table tbody tr:hover td {
+  background-color: #f1f5f9;
+}
 
 /* 单元格状态样式 */
 .cell-state-work {
@@ -532,7 +568,7 @@ body {
   border-color: #fca5a5;
 }
 
-/* 表脚统计行复原 (在岗领导 & 在岗总人数) */
+/* 表脚统计行 */
 .foot-stat-row td {
   font-weight: 600;
   font-size: 12px;
@@ -541,7 +577,7 @@ body {
 .foot-stat-row td.sticky-col {
   font-weight: 700;
   color: #0f172a;
-  background-color: #f8fafc !important;
+  background: #f8fafc !important;
 }
 
 .foot-stat-row td.stat-good {
@@ -649,6 +685,9 @@ body {
 .btn-primary { background: var(--primary-color); color: white; }
 .btn-primary:hover { background: var(--primary-hover); }
 
+.btn-secondary { background: #e2e8f0; color: #334155; }
+.btn-secondary:hover { background: #cbd5e1; }
+
 .btn-outline-primary { border-color: var(--primary-color); color: var(--primary-color); background: transparent; }
 .btn-outline-primary:hover { background: var(--primary-light); }
 
@@ -685,8 +724,15 @@ body {
 .badge-blue { background: #eff6ff; color: #2563eb; }
 .badge-orange { background: #fff7ed; color: #c2410c; }
 
+.flex-center-gap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
 /* -------------------------------------------------------------
-// 弹窗 Modal & 正中央拦截弹窗
+// 弹窗 Modal & 正中央拦截/提醒弹窗
 // ------------------------------------------------------------- */
 .modal-overlay {
   display: none;
@@ -736,7 +782,7 @@ body {
   background: white;
   border-radius: 12px;
   width: 90%;
-  max-width: 360px;
+  max-width: 380px;
   padding: 24px;
   box-shadow: var(--shadow-lg);
   text-align: center;

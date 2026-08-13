@@ -18,6 +18,9 @@ let isAdminEditMode = false;
 // 老花眼大字模式状态
 let isLargeFontMode = false;
 
+// 正中央弹窗回调函数
+let centerConfirmCallback = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
 });
@@ -177,15 +180,37 @@ function switchPage(pageId) {
   if (targetNavBtn) targetNavBtn.classList.add('active');
 }
 
-// 居中警示弹窗
-function showCenterAlert(title, message) {
+// 支持单按钮与双按钮交互的正中央警示弹窗
+function showCenterAlert(title, message, isConfirmDialog = false, onConfirm = null) {
   document.getElementById('centerAlertTitle').textContent = title;
   document.getElementById('centerAlertMessage').textContent = message;
+
+  const btnCancel = document.getElementById('btnCenterCancel');
+  const btnConfirm = document.getElementById('btnCenterConfirm');
+
+  if (isConfirmDialog) {
+    btnCancel.style.display = 'inline-flex';
+    btnConfirm.textContent = '确定提交';
+    centerConfirmCallback = onConfirm;
+  } else {
+    btnCancel.style.display = 'none';
+    btnConfirm.textContent = '确 认';
+    centerConfirmCallback = null;
+  }
+
   document.getElementById('centerNoticeModal').classList.add('show');
 }
 
 function closeCenterAlert() {
   document.getElementById('centerNoticeModal').classList.remove('show');
+}
+
+function handleCenterConfirmAction() {
+  closeCenterAlert();
+  if (centerConfirmCallback) {
+    centerConfirmCallback();
+    centerConfirmCallback = null;
+  }
 }
 
 // -------------------------------------------------------------
@@ -466,7 +491,7 @@ async function handleSwitchStageQuick(stage) {
 }
 
 // -------------------------------------------------------------
-// 核心页面 1：月度排班矩阵大屏
+// 核心页面 1：月度排班矩阵大屏 (划假高亮与高级感首列)
 // -------------------------------------------------------------
 function renderScheduleMatrix() {
   if (!currentSchedule) return;
@@ -532,6 +557,12 @@ function renderScheduleMatrix() {
 
   staffUsers.forEach(u => {
     const tr = document.createElement('tr');
+    
+    // 🌟 用户划假时高亮他这一行 (Row Highlight)
+    const isSelfRow = (currentUser.role !== 'admin' && u.id === currentUser.id);
+    if (isSelfRow) {
+      tr.classList.add('current-user-row');
+    }
 
     let roleTagClass = 'group-a';
     let roleText = 'A组';
@@ -542,7 +573,7 @@ function renderScheduleMatrix() {
     let rowHtml = `
       <td class="sticky-col">
         <div class="user-cell-title">
-          <span class="user-name-bold">${u.name}</span>
+          <span class="user-name-bold">${u.name}${isSelfRow ? '<span class="my-row-badge">我</span>' : ''}</span>
           <span class="role-tag-xs ${roleTagClass}">${roleText}</span>
         </div>
       </td>
@@ -734,12 +765,32 @@ function updateMemberCountDisplay() {
   if (jiaEl) jiaEl.textContent = jiaCount;
 }
 
-// 成员暂存草稿
+// 成员暂存草稿 (带有未选满弹窗提醒)
 function handleMemberSaveSelections() {
-  showToast('已暂存您的划假草稿！', 'info');
+  if (!currentSchedule) return;
+  const maxLimit = currentSchedule.maxSelfSelectDays;
+  let lunCount = 0;
+
+  Object.keys(tempMemberSelections).forEach(d => {
+    if (tempMemberSelections[d] === '✅') lunCount++;
+  });
+
+  if (lunCount < maxLimit) {
+    const diff = maxLimit - lunCount;
+    showCenterAlert(
+      '划假额度提醒',
+      `💡 提示：您本月拥有 ${maxLimit} 天自主轮休假(✅)额度，目前仅勾选了 ${lunCount} 天，尚有 ${diff} 天额度未选。\n未选的轮休假将在第 4 阶段由系统智能算法自动为您分配。确定暂存草稿吗？`,
+      true,
+      () => {
+        showToast('已暂存您的划假草稿！', 'info');
+      }
+    );
+  } else {
+    showToast('已暂存您的划假草稿！', 'info');
+  }
 }
 
-// 成员正式提交方案
+// 成员正式提交方案 (带有未选满弹窗提醒)
 async function handleMemberSubmitSelections() {
   if (!currentSchedule) return;
 
@@ -760,29 +811,46 @@ async function handleMemberSubmitSelections() {
     return;
   }
 
-  try {
-    const res = await fetch('/api/schedules/select-days', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        scheduleId: currentSchedule.id,
-        userId: currentUser.id,
-        selections: selectionsObj
-      })
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast('划假方案已正式提交！管理员与全科大屏同步可见', 'success');
-      loadScheduleData();
-    } else {
-      showToast(data.message || '提交失败', 'error');
+  const doSubmit = async () => {
+    try {
+      const res = await fetch('/api/schedules/select-days', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scheduleId: currentSchedule.id,
+          userId: currentUser.id,
+          selections: selectionsObj
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('划假方案已正式提交！管理员与全科大屏同步可见', 'success');
+        loadScheduleData();
+      } else {
+        showToast(data.message || '提交失败', 'error');
+      }
+    } catch (err) {
+      showToast('提交失败', 'error');
     }
-  } catch (err) {
-    showToast('提交失败', 'error');
+  };
+
+  // 🌟 未选满额度时的弹窗提醒
+  if (lunCount < maxLimit) {
+    const diff = maxLimit - lunCount;
+    showCenterAlert(
+      '划假额度未填满提醒',
+      `💡 提示：您本月拥有 ${maxLimit} 天自主轮休假(✅)额度，目前仅选择了 ${lunCount} 天，剩余 ${diff} 天额度未勾选。\n剩余的 ${diff} 天轮休假将在第 4 阶段由系统智能算法自动为您补全。确定直接提交吗？`,
+      true,
+      () => {
+        doSubmit();
+      }
+    );
+  } else {
+    doSubmit();
   }
 }
 
-// 管理员点击【保存微调结果】一键提交
+// 管理员点击【保存微调结果】
 async function handleSaveAdminEdits() {
   if (!currentSchedule || currentUser.role !== 'admin') return;
   showToast('正在保存管理员排班微调结果并产生热备份...', 'info');

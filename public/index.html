@@ -125,7 +125,7 @@
     <div id="appPagesContainer" style="display: none;">
 
       <!-- =================================================================== -->
-      <!-- 核心页面 1：月度排班大屏 (恢复最顶级漂亮高质感 UI) -->
+      <!-- 核心页面 1：月度排班大屏 -->
       <!-- =================================================================== -->
       <section id="page-matrix" class="app-page active">
 
@@ -138,7 +138,7 @@
         <!-- 排班大屏表格主卡片 -->
         <div class="card shadow-sm">
           
-          <!-- 1. Header 顶部主栏：标题 + Pill 标签 + 右侧一字排开的按钮 -->
+          <!-- 1. Header 顶部主栏 -->
           <div class="card-header border-bottom flex-between-center">
             
             <div class="header-meta-group">
@@ -174,7 +174,7 @@
                 </button>
               </div>
 
-              <!-- 超级管理员专有按钮：开启微调编辑模式 ➔ 智能补全 ➔ 正式发布 ➔ 导出 Excel -->
+              <!-- 超级管理员专有按钮 -->
               <div class="admin-inline-tools" id="adminMatrixInlineTools" style="display: none;">
                 <button class="btn btn-outline-info btn-sm" id="btnToggleAdminEditMode">
                   <i class="fa-solid fa-pen-to-square"></i> 开启微调编辑模式
@@ -196,7 +196,7 @@
             </div>
           </div>
 
-          <!-- 2. 图例说明子栏 Subheader (恢复独立柔和浅灰底色横条) -->
+          <!-- 2. 图例说明子栏 Subheader -->
           <div class="card-subheader flex-between-center px-4 py-2 border-bottom">
             <div class="matrix-legend-row">
               <span class="legend-chip leader-main"><span class="dot"></span> 正科长</span>
@@ -438,16 +438,17 @@
     </div>
   </div>
 
-  <!-- 正中央警示弹窗 Modal -->
+  <!-- 正中央警示/确认双功能 Modal -->
   <div class="modal-overlay" id="centerNoticeModal">
     <div class="center-alert-card">
       <div class="center-alert-icon">
-        <i class="fa-solid fa-triangle-exclamation"></i>
+        <i class="fa-solid fa-circle-question" id="centerAlertIcon"></i>
       </div>
       <h3 class="center-alert-title" id="centerAlertTitle">提示</h3>
       <p class="center-alert-message" id="centerAlertMessage">提示信息</p>
-      <div class="center-alert-footer">
-        <button class="btn btn-primary btn-block" onclick="closeCenterAlert()">确 认</button>
+      <div class="center-alert-footer flex-center-gap">
+        <button class="btn btn-secondary" id="btnCenterCancel" style="display: none;" onclick="closeCenterAlert()">返回继续划假</button>
+        <button class="btn btn-primary" id="btnCenterConfirm" onclick="handleCenterConfirmAction()">确 认</button>
       </div>
     </div>
   </div>
