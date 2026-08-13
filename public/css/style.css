@@ -1,5 +1,5 @@
 /* ==========================================================================
-// 科室智能轮休排班系统 - style.css (Light Dynamic Premium UI)
+// 科室智能轮休排班系统 - style.css (Light Dynamic Premium Display UI)
 // ========================================================================== */
 
 :root {
@@ -23,11 +23,11 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 
-  --font-base-size: 14px;
+  --font-base-size: 14.5px;
 }
 
 body.large-font-mode {
-  --font-base-size: 16.5px;
+  --font-base-size: 17.5px;
 }
 
 * {
@@ -43,19 +43,20 @@ body {
   font-size: var(--font-base-size);
   line-height: 1.5;
   transition: font-size 0.2s ease;
+  min-height: 100vh;
 }
 
 /* -------------------------------------------------------------
 // Header 头部
 // ------------------------------------------------------------- */
 .app-header {
-  height: 56px;
+  height: 60px;
   background-color: #ffffff;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 24px;
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
@@ -69,42 +70,42 @@ body {
 }
 
 .logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: white;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .logo-text h1 {
   font-family: 'Outfit', sans-serif;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   color: #1e293b;
   line-height: 1.2;
 }
 
 .logo-text .subtitle {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
   display: block;
 }
 
 .app-nav {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .nav-item {
   border: none;
   background: transparent;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
@@ -128,7 +129,7 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .user-chip {
@@ -136,21 +137,21 @@ body {
   align-items: center;
   gap: 8px;
   background: #f1f5f9;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   border: 1px solid var(--border-color);
 }
 
 .user-avatar {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: var(--primary-color);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -160,7 +161,7 @@ body {
 }
 
 .user-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -185,7 +186,7 @@ body {
   border-radius: 8px;
   box-shadow: var(--shadow-lg);
   padding: 6px;
-  min-width: 250px;
+  min-width: 260px;
   z-index: 200;
 }
 
@@ -198,7 +199,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-main);
   text-decoration: none;
   border-radius: 6px;
@@ -213,17 +214,22 @@ body {
 // 主容器
 // ------------------------------------------------------------- */
 .app-main-content {
-  padding: 16px;
-  max-width: 1750px;
+  padding: 20px 24px;
+  max-width: 1800px;
   margin: 0 auto;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  flex-direction: column;
 }
 
 .app-page {
   display: none;
+  flex: 1;
 }
 
 .app-page.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 登录面板 */
@@ -231,28 +237,28 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(85vh - 56px);
+  min-height: calc(85vh - 60px);
 }
 
 .auth-card {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 32px;
+  border-radius: 14px;
+  padding: 36px;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   box-shadow: var(--shadow-md);
   text-align: center;
 }
 
 .auth-logo {
-  font-size: 36px;
+  font-size: 40px;
   color: var(--primary-color);
   margin-bottom: 12px;
 }
 
 .auth-card h2 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   margin-bottom: 4px;
 }
@@ -267,8 +273,8 @@ body {
   background: #f8fafc;
   border: 1px border-dashed #cbd5e1;
   border-radius: 8px;
-  padding: 10px;
-  margin: 16px 0;
+  padding: 12px;
+  margin: 18px 0;
   text-align: left;
 }
 
@@ -290,17 +296,21 @@ body {
 .card {
   background: white;
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .card-header {
-  padding: 12px 18px;
+  padding: 16px 24px;
 }
 
 .card-body.p-0 {
   padding: 0 !important;
+  flex: 1;
 }
 
 .flex-between-center {
@@ -314,12 +324,12 @@ body {
 .header-meta-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
 .banner-title-inline {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -330,22 +340,22 @@ body {
 .status-chip {
   background: #e0f2fe;
   color: #0369a1;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 4px;
   border: 1px solid #bae6fd;
 }
 
 .header-pills-inline {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .pill-badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 6px;
   font-weight: 500;
 }
 
@@ -356,38 +366,39 @@ body {
 .header-actions-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .member-action-tools, .admin-inline-tools {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 /* 图例说明行 Subheader */
 .card-subheader {
   background-color: #f8fafc;
+  padding: 10px 24px;
 }
 
 .matrix-legend-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 11px;
+  gap: 14px;
+  font-size: 12px;
 }
 
 .legend-chip {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-weight: 500;
 }
 
 .legend-chip .dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
 }
 
@@ -397,9 +408,9 @@ body {
 .legend-chip.group-b .dot { background: #f97316; }
 
 .legend-tag {
-  padding: 1px 6px;
-  border-radius: 3px;
-  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
 .tag-work { background: #ffffff; border: 1px solid #cbd5e1; color: #64748b; }
@@ -409,13 +420,13 @@ body {
 .counter-chip {
   background: #ffffff;
   border: 1px solid #cbd5e1;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
 /* -------------------------------------------------------------
-// 大屏表格与高级感首列极致升级 (Premium Table & Row Highlight)
+// 大屏表格 (舒展拉宽，充盈屏幕)
 // ------------------------------------------------------------- */
 .table-responsive-wrapper {
   overflow-x: auto;
@@ -431,11 +442,12 @@ body {
   table-layout: auto;
 }
 
+/* 🌟 行高由 44px 拉宽调高至 52px，舒展大气不紧凑 */
 .schedule-matrix-table th,
 .schedule-matrix-table td {
   border: 1px solid var(--border-color);
-  padding: 4px;
-  height: 44px;
+  padding: 6px 4px;
+  height: 52px;
   white-space: nowrap;
   transition: background-color 0.15s ease;
 }
@@ -444,14 +456,14 @@ body {
   background-color: #f8fafc;
   font-weight: 600;
   color: #334155;
-  font-size: 12px;
+  font-size: 13px;
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 8px 4px;
+  padding: 10px 4px;
 }
 
-/* 第一列【成员姓名 / 岗位】高级感微晶质感 */
+/* 第一列【成员姓名 / 岗位】高度与宽敞度升级 */
 .schedule-matrix-table .sticky-col {
   position: sticky;
   left: 0;
@@ -460,9 +472,9 @@ body {
   border-right: 2px solid #cbd5e1 !important;
   box-shadow: 4px 0 8px -2px rgba(15, 23, 42, 0.05);
   text-align: left !important;
-  padding: 8px 12px !important;
-  min-width: 145px;
-  width: 145px;
+  padding: 10px 14px !important;
+  min-width: 155px;
+  width: 155px;
 }
 
 .user-cell-title {
@@ -474,7 +486,7 @@ body {
 
 .user-name-bold {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 14.5px;
   color: #0f172a;
   letter-spacing: 0.3px;
   font-family: 'Outfit', -apple-system, sans-serif;
@@ -482,8 +494,8 @@ body {
 
 /* 胶囊状高级感职务 Badge */
 .role-tag-xs {
-  font-size: 11px;
-  padding: 2px 7px;
+  font-size: 11.5px;
+  padding: 2.5px 8px;
   border-radius: 6px;
   font-weight: 600;
   line-height: 1;
@@ -511,10 +523,10 @@ tr.current-user-row .user-name-bold {
 }
 
 .my-row-badge {
-  font-size: 10px;
+  font-size: 10.5px;
   background: var(--primary-color);
   color: white;
-  padding: 1px 4px;
+  padding: 1px 5px;
   border-radius: 4px;
   margin-left: 4px;
   font-weight: 600;
@@ -534,24 +546,25 @@ tr.current-user-row .user-name-bold {
   background-color: #dcfce7 !important;
   color: #15803d;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .cell-state-jia {
   background-color: #fee2e2 !important;
   color: #b91c1c;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
 }
 
-/* 单元格下拉框 */
+/* 单元格下拉框放大舒展 */
 .cell-select-dropdown {
   width: 100%;
-  height: 32px;
+  height: 36px;
   border: 1px solid #cbd5e1;
-  border-radius: 4px;
+  border-radius: 6px;
   text-align: center;
   font-weight: 700;
+  font-size: 15px;
   background: white;
   cursor: pointer;
 }
@@ -571,7 +584,7 @@ tr.current-user-row .user-name-bold {
 /* 表脚统计行 */
 .foot-stat-row td {
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .foot-stat-row td.sticky-col {
@@ -597,12 +610,12 @@ tr.current-user-row .user-name-bold {
   font-weight: 700;
 }
 
-/* Card Footer */
+/* Card Footer 放大 */
 .card-footer {
-  padding: 10px 18px;
+  padding: 14px 24px;
   background-color: #ffffff;
   border-top: 1px solid var(--border-color);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* -------------------------------------------------------------
@@ -610,7 +623,7 @@ tr.current-user-row .user-name-bold {
 // ------------------------------------------------------------- */
 .stage-stepper-light {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 
 .step-card {
@@ -618,10 +631,10 @@ tr.current-user-row .user-name-bold {
   background: #f8fafc;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 12px;
+  padding: 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   opacity: 0.6;
 }
 
@@ -638,8 +651,8 @@ tr.current-user-row .user-name-bold {
 }
 
 .step-num {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #cbd5e1;
   color: white;
@@ -647,7 +660,7 @@ tr.current-user-row .user-name-bold {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .step-card.active .step-num { background: var(--primary-color); }
@@ -658,8 +671,8 @@ tr.current-user-row .user-name-bold {
   flex-direction: column;
 }
 
-.step-name { font-size: 13px; font-weight: 600; }
-.step-desc { font-size: 11px; color: var(--text-muted); }
+.step-name { font-size: 14px; font-weight: 600; }
+.step-desc { font-size: 11.5px; color: var(--text-muted); }
 
 /* -------------------------------------------------------------
 // 按钮与通用样式
@@ -669,9 +682,9 @@ tr.current-user-row .user-name-bold {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 7px 16px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   border: 1px solid transparent;
   cursor: pointer;
@@ -679,8 +692,8 @@ tr.current-user-row .user-name-bold {
   white-space: nowrap;
 }
 
-.btn-sm { padding: 4px 10px; font-size: 12px; }
-.btn-lg { padding: 10px 18px; font-size: 15px; font-weight: 600; }
+.btn-sm { padding: 5px 12px; font-size: 12.5px; }
+.btn-lg { padding: 12px 20px; font-size: 16px; font-weight: 600; }
 
 .btn-primary { background: var(--primary-color); color: white; }
 .btn-primary:hover { background: var(--primary-hover); }
@@ -713,8 +726,8 @@ tr.current-user-row .user-name-bold {
 
 .badge {
   display: inline-block;
-  padding: 2px 8px;
-  font-size: 11px;
+  padding: 3px 10px;
+  font-size: 11.5px;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -728,11 +741,11 @@ tr.current-user-row .user-name-bold {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 /* -------------------------------------------------------------
-// 弹窗 Modal & 正中央拦截/提醒弹窗
+// 弹窗 Modal
 // ------------------------------------------------------------- */
 .modal-overlay {
   display: none;
@@ -751,92 +764,92 @@ tr.current-user-row .user-name-bold {
 
 .modal-card {
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   width: 90%;
-  max-width: 440px;
+  max-width: 450px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 
 .modal-header {
-  padding: 12px 18px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.modal-header h3 { font-size: 15px; font-weight: 700; }
-.modal-close { border: none; background: transparent; font-size: 20px; cursor: pointer; color: var(--text-muted); }
+.modal-header h3 { font-size: 16px; font-weight: 700; }
+.modal-close { border: none; background: transparent; font-size: 22px; cursor: pointer; color: var(--text-muted); }
 
 .modal-footer {
-  padding: 12px 18px;
+  padding: 14px 20px;
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
 /* 精简正中央弹窗 (Center Alert Card) */
 .center-alert-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 14px;
   width: 90%;
-  max-width: 380px;
-  padding: 24px;
+  max-width: 400px;
+  padding: 28px;
   box-shadow: var(--shadow-lg);
   text-align: center;
 }
 
 .center-alert-icon {
-  font-size: 38px;
+  font-size: 42px;
   color: var(--warning-color);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .center-alert-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .center-alert-message {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--text-muted);
-  margin-bottom: 20px;
-  line-height: 1.5;
+  margin-bottom: 24px;
+  line-height: 1.55;
 }
 
 /* Toast */
 .toast-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 24px;
+  right: 24px;
   z-index: 1100;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .toast {
   background: white;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 10px 16px;
+  padding: 12px 18px;
   box-shadow: var(--shadow-md);
-  font-size: 13px;
+  font-size: 13.5px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .alert-box {
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 12.5px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .alert-info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
