@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>科室智能轮休排班系统</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="light-theme">
+
+  <!-- 顶部主导航栏 -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-icon"><i class="fa-solid fa-calendar-check"></i></div>
+      <div class="logo-text">
+        <h1>科室智能轮休排班系统</h1>
+        <span class="subtitle">Smart Duty Rostering System</span>
+      </div>
+    </div>
+
+    <!-- 顶部导航 Menu -->
+    <nav class="app-nav" id="mainAppNav" style="display: none;">
+      <button class="nav-item active" data-page="page-matrix">
+        <i class="fa-solid fa-table-cells"></i> 月度排班大屏
+      </button>
+      <button class="nav-item admin-only" data-page="page-stages" id="navItemStages" style="display: none;">
+        <i class="fa-solid fa-timeline"></i> 排班阶段管理
+      </button>
+      <button class="nav-item admin-only" data-page="page-users" id="navItemUsers" style="display: none;">
+        <i class="fa-solid fa-users-gear"></i> 人员名册与密码
+      </button>
+    </nav>
+
+    <!-- 快捷体验与用户信息 -->
+    <div class="header-right" id="userProfileBar" style="display: none;">
+      
+      <!-- 快捷阶段切换演示助手 -->
+      <div class="stage-quick-selector admin-only" style="display: none;">
+        <span style="font-size: 11px; color: var(--text-muted);">演示-快速切阶段:</span>
+        <select id="quickStageSelect" class="form-control" style="width: auto; padding: 2px 6px; font-size: 12px; height: 28px;">
+          <option value="1">第1阶段: 科长填报</option>
+          <option value="2">第2阶段: 优先组填报</option>
+          <option value="3">第3阶段: 全员开放(所有人划假)</option>
+          <option value="4">第4阶段: 智能补全算法</option>
+          <option value="5">第5阶段: 微调与发布</option>
+        </select>
+      </div>
+
+      <div class="quick-roles-dropdown">
+        <button class="btn btn-light-ghost btn-sm" id="btnQuickSwitch">
+          <i class="fa-solid fa-users-viewfinder"></i> 拼音账号快捷登录 <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="quick-roles-menu" id="quickRolesMenu">
+          <a href="#" data-user="admin" data-pwd="admin"><i class="fa-solid fa-user-shield"></i> 超级管理员 (admin)</a>
+          <a href="#" data-user="yha" data-pwd="582914"><i class="fa-solid fa-user-tie"></i> 姚惠安 (正科长: yha / 582914)</a>
+          <a href="#" data-user="lmx" data-pwd="491028"><i class="fa-solid fa-user-gear"></i> 李敏霞 (副科长A: lmx / 491028)</a>
+          <a href="#" data-user="lw" data-pwd="839105"><i class="fa-solid fa-user-gear"></i> 罗巍 (副科长B: lw / 839105)</a>
+          <a href="#" data-user="lhq" data-pwd="204819"><i class="fa-solid fa-user"></i> 罗焕全 (干部A: lhq / 204819)</a>
+          <a href="#" data-user="zqm" data-pwd="719304"><i class="fa-solid fa-user"></i> 郑庆明 (干部A: zqm / 719304)</a>
+          <a href="#" data-user="ldl" data-pwd="620491"><i class="fa-solid fa-user"></i> 李大良 (干部B: ldl / 620491)</a>
+          <a href="#" data-user="zwb" data-pwd="318290"><i class="fa-solid fa-user"></i> 周卫波 (干部B: zwb / 318290)</a>
+          <a href="#" data-user="sjf" data-pwd="904182"><i class="fa-solid fa-user"></i> 施剑锋 (干部A: sjf / 904182)</a>
+          <a href="#" data-user="hwy" data-pwd="159203"><i class="fa-solid fa-user"></i> 洪文艺 (干部B: hwy / 159203)</a>
+        </div>
+      </div>
+
+      <div class="user-chip" id="btnOpenSelfProfile" style="cursor: pointer;" title="点击修改我的密码">
+        <span class="user-avatar" id="userAvatar">A</span>
+        <div class="user-meta">
+          <span class="user-name" id="currentUserName">---</span>
+          <span class="user-role-tag" id="currentUserRole">--- (点击修改密码)</span>
+        </div>
+      </div>
+
+      <button class="btn btn-outline-danger btn-sm" id="btnLogout">
+        <i class="fa-solid fa-right-from-bracket"></i> 退出
+      </button>
+    </div>
+  </header>
+
+  <!-- 页面主体容器 -->
+  <main class="app-main-content">
+
+    <!-- 0. 登录界面 -->
+    <section id="loginSection" class="auth-section">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2>欢迎登录排班系统</h2>
+        <p class="auth-subtitle">账号为个人拼音首字母，密码为随机 6 位数字</p>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label><i class="fa-solid fa-user"></i> 拼音账号 / 用户名</label>
+            <input type="text" id="inputUsername" placeholder="如姚惠安输入 yha" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-lock"></i> 6 位随机密码</label>
+            <input type="password" id="inputPassword" placeholder="请输入您的密码" required>
+          </div>
+
+          <div class="quick-demo-tips">
+            <div class="tip-label">⚡ 点击快捷填充示例账号密码：</div>
+            <div class="tip-badges">
+              <span class="badge badge-admin" onclick="fillLogin('admin', 'admin')">管理员: admin</span>
+              <span class="badge badge-purple" onclick="fillLogin('yha', '582914')">姚惠安: yha / 582914</span>
+              <span class="badge badge-blue" onclick="fillLogin('lmx', '491028')">李敏霞: lmx / 491028</span>
+              <span class="badge badge-orange" onclick="fillLogin('ldl', '620491')">李大良: ldl / 620491</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            登 录 排 班 系 统
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 登录后的主内容区 -->
+    <div id="appPagesContainer" style="display: none;">
+
+      <!-- =================================================================== -->
+      <!-- 核心页面 1：月度排班大屏 (恢复最顶级漂亮高质感 UI) -->
+      <!-- =================================================================== -->
+      <section id="page-matrix" class="app-page active">
+
+        <!-- 非填报轮次时的阶段解释卡片 -->
+        <div class="alert-box alert-info mb-2" id="memberStageWaitNotice" style="display: none;">
+          <i class="fa-solid fa-clock font-bold"></i>
+          <span id="memberStageWaitText">提示：当前为科长优先填报阶段，您的轮次尚未开启。</span>
+        </div>
+
+        <!-- 排班大屏表格主卡片 -->
+        <div class="card shadow-sm">
+          
+          <!-- 1. Header 顶部主栏：标题 + Pill 标签 + 右侧一字排开的按钮 -->
+          <div class="card-header border-bottom flex-between-center">
+            
+            <div class="header-meta-group">
+              <h2 class="banner-title-inline">
+                <i class="fa-solid fa-table-cells text-primary"></i>
+                <span id="headerMonthTitle">2026年 9月 科室排班大屏</span>
+              </h2>
+              <span class="status-chip" id="matrixStatusChip">状态：草稿/编制中</span>
+              
+              <!-- 快捷月度信息 Pill 聚合标签 -->
+              <div class="header-pills-inline">
+                <span class="pill-badge gray">全月 <strong id="statTotalDays">30</strong> 天</span>
+                <span class="pill-badge gold">轮休假 <strong id="statHolidayDays">8</strong> 天</span>
+                <span class="pill-badge blue">自选上限 <strong id="statMaxSelfDays">5</strong> 天</span>
+              </div>
+            </div>
+
+            <!-- 右侧操作工具栏 -->
+            <div class="header-actions-group">
+              
+              <!-- 放大字体模式 -->
+              <button class="btn btn-outline-warning btn-sm" id="btnToggleLargeFont">
+                <i class="fa-solid fa-magnifying-glass-plus"></i> <span id="largeFontBtnText">放大字体模式</span>
+              </button>
+
+              <!-- 个人用户专属：【保存划假草稿】与【提交划假方案】 -->
+              <div class="member-action-tools" id="memberActionTools" style="display: none;">
+                <button class="btn btn-outline-primary btn-sm" id="btnSaveMemberSelections">
+                  <i class="fa-solid fa-floppy-disk"></i> 保存划假草稿
+                </button>
+                <button class="btn btn-primary btn-sm" id="btnSubmitMemberSelections">
+                  <i class="fa-solid fa-paper-plane"></i> 提交划假方案
+                </button>
+              </div>
+
+              <!-- 超级管理员专有按钮：开启微调编辑模式 ➔ 智能补全 ➔ 正式发布 ➔ 导出 Excel -->
+              <div class="admin-inline-tools" id="adminMatrixInlineTools" style="display: none;">
+                <button class="btn btn-outline-info btn-sm" id="btnToggleAdminEditMode">
+                  <i class="fa-solid fa-pen-to-square"></i> 开启微调编辑模式
+                </button>
+                <button class="btn btn-primary btn-sm" id="btnSaveAdminEdits" style="display: none;">
+                  <i class="fa-solid fa-floppy-disk"></i> 保存微调结果
+                </button>
+                <button class="btn btn-success btn-sm" id="btnAutoFillInMatrix" title="一键根据规则求解分配剩余轮休✅">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> 智能补全
+                </button>
+                <button class="btn btn-success btn-sm" id="btnPublishInMatrix" title="正式发布供全科查看">
+                  <i class="fa-solid fa-paper-plane"></i> 正式发布
+                </button>
+                <button class="btn btn-outline-success btn-sm" id="btnExportCSV">
+                  <i class="fa-solid fa-file-excel"></i> 导出 Excel
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 2. 图例说明子栏 Subheader (恢复独立柔和浅灰底色横条) -->
+          <div class="card-subheader flex-between-center px-4 py-2 border-bottom">
+            <div class="matrix-legend-row">
+              <span class="legend-chip leader-main"><span class="dot"></span> 正科长</span>
+              <span class="legend-chip leader-sub"><span class="dot"></span> 副科长</span>
+              <span class="legend-chip group-a"><span class="dot"></span> A组成员</span>
+              <span class="legend-chip group-b"><span class="dot"></span> B组成员</span>
+              <span class="legend-tag tag-work">空白 (上班)</span>
+              <span class="legend-tag tag-lun">✅ 轮休假</span>
+              <span class="legend-tag tag-jia">假 (主动假)</span>
+            </div>
+
+            <!-- 成员选假计数 -->
+            <div class="member-counter-notice" id="memberCounterNotice" style="display: none;">
+              <span class="counter-chip">
+                已选轮休假: <strong class="text-primary" id="currentLunCountDisplay">0</strong> / <span id="maxLimitCountDisplay">5</span> 天 | 主动请假: <strong class="text-danger" id="currentJiaCountDisplay">0</strong> 天
+              </span>
+            </div>
+          </div>
+
+          <!-- 3. 表格主体容器 -->
+          <div class="card-body p-0">
+            <div class="table-responsive-wrapper">
+              <table class="schedule-matrix-table" id="scheduleMatrixTable">
+                <thead id="matrixHead"></thead>
+                <tbody id="matrixBody"></tbody>
+                <tfoot id="matrixFoot"></tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- 4. Footer 底部规则提示与右下角一键清零/备份恢复 -->
+          <div class="card-footer muted-footer flex-between-center">
+            <div class="footer-left-rules">
+              <span><i class="fa-solid fa-circle-info"></i> 每日校验领导 ($\ge 1$) 与在岗总人数 ($\ge 6$，极端 $\ge 5$)。✅ 和 假 均判定为不上班休假。</span>
+              <span class="text-gold font-bold ml-2" id="autoGroupNotice">本月设定组别，下月自动交替。错过优先轮次者自动掉至第3轮补填。</span>
+            </div>
+
+            <div class="footer-right-actions admin-only" id="adminFooterActions" style="display: none;">
+              <button class="btn btn-outline-danger btn-sm" id="btnResetScheduleInMatrix" title="清空本月全员划假，重新开始">
+                <i class="fa-solid fa-trash-can"></i> 一键清零重置
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" id="btnRestoreBackupInMatrix" title="紧急恢复误清零前的排班" style="display: none;">
+                <i class="fa-solid fa-rotate-left"></i> 恢复清零前备份
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- 核心页面 2：排班阶段管理 (管理员专有) -->
+      <!-- =================================================================== -->
+      <section id="page-stages" class="app-page">
+        <div class="card shadow-sm mb-4">
+          <div class="card-header border-bottom">
+            <div>
+              <h2><i class="fa-solid fa-timeline"></i> 排班阶段流转面板</h2>
+              <p class="subtitle-desc">每个月最后一周开始排班。科长第1轮(1天) ➔ 优先组第2轮(1天) ➔ 普通组第3轮(2天全员)，错过者自动沉降至第3轮。</p>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="stage-stepper-light">
+              <div class="step-card" id="step1">
+                <div class="step-num">1</div>
+                <div class="step-info">
+                  <span class="step-name">科长优先填报</span>
+                  <span class="step-desc">第1轮限时 1 天 (姚惠安)</span>
+                </div>
+              </div>
+              <div class="step-card" id="step2">
+                <div class="step-num">2</div>
+                <div class="step-info">
+                  <span class="step-name" id="step2Title">优先组填报</span>
+                  <span class="step-desc">第2轮限时 1 天 (单A双B交替)</span>
+                </div>
+              </div>
+              <div class="step-card" id="step3">
+                <div class="step-num">3</div>
+                <div class="step-info">
+                  <span class="step-name">普通组填报</span>
+                  <span class="step-desc">第3轮限时 2 天 (全员/沉降补填)</span>
+                </div>
+              </div>
+              <div class="step-card" id="step4">
+                <div class="step-num">4</div>
+                <div class="step-info">
+                  <span class="step-name">智能算法补全</span>
+                  <span class="step-desc">自动补全轮休✅</span>
+                </div>
+              </div>
+              <div class="step-card" id="step5">
+                <div class="step-num">5</div>
+                <div class="step-info">
+                  <span class="step-name">微调与发布</span>
+                  <span class="step-desc">确认后一键发布</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert-box alert-info mt-4" id="stageAlertBox">
+              <i class="fa-solid fa-circle-info"></i>
+              <span id="stageAlertMessage">阶段信息加载中...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-header border-bottom">
+            <h3><i class="fa-solid fa-calendar-plus"></i> 发起新月份排班计划</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-row-inline">
+              <div class="form-group-inline">
+                <label>年份：</label>
+                <input type="number" id="inputNewYear" min="2024" max="2035" value="2026" class="form-control" style="width: 100px;">
+              </div>
+              <div class="form-group-inline">
+                <label>月份：</label>
+                <input type="number" id="inputNewMonth" min="1" max="12" value="9" class="form-control" style="width: 80px;">
+              </div>
+              <div class="form-group-inline">
+                <label>当月法定轮休假：</label>
+                <input type="number" id="inputHolidayDays" min="1" max="15" value="8" class="form-control" style="width: 80px;"> 天
+              </div>
+              <button class="btn btn-primary" id="btnCreateSchedule">
+                <i class="fa-solid fa-plus"></i> 创建排班计划
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- 核心页面 3：人员名册与密码管理 (管理员专有) -->
+      <!-- =================================================================== -->
+      <section id="page-users" class="app-page">
+        <div class="card shadow-sm">
+          <div class="card-header border-bottom">
+            <div>
+              <h2><i class="fa-solid fa-users-gear"></i> 科室人员名册与密码管理</h2>
+              <p class="subtitle-desc">为防互猜密码，系统为每个人分配了随机 6 位默认数字密码。管理员可在此清晰查看或重置。</p>
+            </div>
+            <button class="btn btn-success" id="btnAddUserModal">
+              <i class="fa-solid fa-user-plus"></i> 添加新成员
+            </button>
+          </div>
+
+          <div class="card-body p-0">
+            <div class="table-responsive-wrapper">
+              <table class="styled-table" id="usersTable">
+                <thead>
+                  <tr>
+                    <th>登录账号(拼音)</th>
+                    <th>姓名</th>
+                    <th>职务/角色</th>
+                    <th>所属分组</th>
+                    <th>专属 6 位默认密码</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 人员编辑 Modal -->
+  <div class="modal-overlay" id="userModalOverlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="userModalTitle">编辑人员信息</h3>
+        <button class="modal-close" onclick="closeUserModal()">&times;</button>
+      </div>
+      <form id="userModalForm">
+        <input type="hidden" id="modalUserId">
+        <div class="form-group">
+          <label>登录账号 (拼音首字母如 yha)</label>
+          <input type="text" id="modalUsername" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>姓名</label>
+          <input type="text" id="modalName" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>职务/角色</label>
+          <select id="modalRole" class="form-control">
+            <option value="leader_main">正科长 (领导)</option>
+            <option value="leader_sub">副科长 (领导)</option>
+            <option value="staff">普通干部</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>所属分组</label>
+          <select id="modalGroup" class="form-control">
+            <option value="A">A 组</option>
+            <option value="B">B 组</option>
+            <option value="none">无分组</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>重置 6 位数字密码</label>
+          <input type="text" id="modalPassword" placeholder="留空则为 123" class="form-control">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeUserModal()">取消</button>
+          <button type="submit" class="btn btn-primary">保存数据</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 个人自我修改密码 Modal -->
+  <div class="modal-overlay" id="selfProfileModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-key"></i> 修改我的登录密码</h3>
+        <button class="modal-close" onclick="closeSelfProfileModal()">&times;</button>
+      </div>
+      <form id="selfProfileForm">
+        <div class="form-group">
+          <label>我的姓名</label>
+          <input type="text" id="selfProfileName" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>新密码 (设置您的专属新密码)</label>
+          <input type="password" id="selfProfilePassword" placeholder="请输入新密码" class="form-control" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSelfProfileModal()">取消</button>
+          <button type="submit" class="btn btn-primary">保存我的新密码</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 正中央警示弹窗 Modal -->
+  <div class="modal-overlay" id="centerNoticeModal">
+    <div class="center-alert-card">
+      <div class="center-alert-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="center-alert-title" id="centerAlertTitle">提示</h3>
+      <p class="center-alert-message" id="centerAlertMessage">提示信息</p>
+      <div class="center-alert-footer">
+        <button class="btn btn-primary btn-block" onclick="closeCenterAlert()">确 认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
