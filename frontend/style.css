@@ -1,0 +1,665 @@
+* { box-sizing: border-box; }
+:root {
+  /* v4.1：亮色科技玻璃主题——沿用 v4.0 设计语言（玻璃面板 + 青→蓝→紫渐变 +
+     双光晕 + 焦点光圈），基底反转为亮色；文本/次文本/弱化文本与语义色按亮底取值 */
+  --ink: #1E293B; --muted: #5B6B84; --faint: #8494AD; --line: rgba(37,99,235,.10);
+  --blue: #2563EB; --blue-dark: #1D4ED8; --bg: #F2F6FC;
+  --green: #16A34A; --orange: #D97706; --red: #DC2626;
+  --panel: rgba(255,255,255,.78); --input-bg: #FFFFFF; --head-bg: #EEF3FA;
+  --grad: linear-gradient(135deg, #22D3EE, #3B82F6 55%, #8B5CF6);
+  --radius: 14px;
+  /* v2.3：月历行高自适应变量，由 app.js 的 fitGrids() 按可用高度计算后写入 table 元素；
+     无 JS 时回退 54px（与 v2.2 一致） */
+  --cellh: 54px;
+}
+body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--ink);
+  background:
+    radial-gradient(900px 620px at 8% -10%, rgba(34,211,238,.14), rgba(34,211,238,0) 60%),
+    radial-gradient(1000px 720px at 108% 112%, rgba(139,92,246,.12), rgba(139,92,246,0) 62%),
+    linear-gradient(160deg, #FBFDFF 0%, #F2F6FC 55%, #E9EFF9 100%);
+  background-attachment: fixed; }
+.hidden { display: none !important; }
+button { cursor: pointer; border: 1px solid #C9D2DD; background: rgba(255,255,255,.85); border-radius: 8px; padding: 7px 14px; font-size: 14px; color: var(--ink); transition: background .15s, border-color .15s, box-shadow .15s, filter .15s; }
+button:hover { border-color: rgba(34,211,238,.65); background: rgba(34,211,238,.06); }
+button.primary { background: var(--grad); color: #fff; border-color: transparent; box-shadow: 0 4px 16px rgba(59,130,246,.28), inset 0 1px 0 rgba(255,255,255,.35); }
+button.primary:hover { background: var(--grad); filter: brightness(1.08); }
+button.danger { color: var(--red); border-color: rgba(220,38,38,.4); background: rgba(220,38,38,.04); }
+button.danger:hover { border-color: rgba(220,38,38,.65); background: rgba(220,38,38,.08); }
+button.ghost { background: transparent; color: #cbd5e1; border-color: rgba(255,255,255,.35); }
+button.ghost:hover { color: #fff; border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.08); }
+button.wide { width: 100%; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+input, select { padding: 7px 9px; border: 1px solid #C9D2DD; border-radius: 8px; font-size: 14px; background: var(--input-bg); color: var(--ink); }
+input:focus, select:focus { outline: none; border-color: #22D3EE; box-shadow: 0 0 0 3px rgba(34,211,238,.25); }
+select option { background: #FFFFFF; color: #1E293B; }
+.err { color: var(--red); min-height: 18px; }
+.hint { color: var(--muted); font-size: 12px; line-height: 1.7; }
+.sub { color: var(--muted); }
+.ok-msg { color: var(--green); font-size: 13px; }
+.bad-msg { color: var(--red); font-size: 13px; }
+
+/* 登录 */
+.login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.login-card { background: rgba(255,255,255,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 34px 38px; border: 1px solid rgba(37,99,235,.12); border-radius: 16px; box-shadow: 0 24px 60px rgba(30,64,175,.14), inset 0 1px 0 rgba(255,255,255,.85); width: min(360px, calc(100vw - 32px)); text-align: left; }
+.login-logo { width: 46px; height: 46px; border-radius: 12px; background: var(--grad); color: #fff; font-size: 24px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 6px 18px rgba(59,130,246,.3), inset 0 1px 0 rgba(255,255,255,.35); }
+.login-card h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: .02em; }
+.login-card label { display: block; margin: 14px 0 6px; font-size: 13px; color: #5B6B84; }
+.login-card input { width: 100%; }
+.login-card button { margin-top: 20px; padding: 11px; font-size: 16px; }
+
+/* 框架 */
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 224px; flex: 0 0 224px; background: #16283F; color: #e2e8f0; display: flex; flex-direction: column; padding: 18px 14px; position: sticky; top: 0; height: 100vh; border-right: 1px solid rgba(34,211,238,.14); box-shadow: 16px 0 40px rgba(15,35,70,.12); }
+.brand { display: flex; gap: 10px; align-items: center; padding: 2px 4px 14px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.brand-badge { width: 38px; height: 38px; border-radius: 10px; background: var(--grad); color: #fff; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(59,130,246,.4), inset 0 1px 0 rgba(255,255,255,.3); }
+.brand-name { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+.brand-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.user-card { padding: 12px 6px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.user-name { font-weight: 600; }
+.user-role { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+.nav { flex: 1; padding-top: 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.nav .nav-section { font-size: 11px; color: #7d8ea8; padding: 12px 10px 4px; letter-spacing: .14em; }
+.nav a { color: #cbd5e1; text-decoration: none; padding: 9px 12px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+.nav a.active { background: var(--grad); color: #fff; box-shadow: 0 4px 16px rgba(59,130,246,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+/* v3.0：导航图标定宽槽位——图标宽度不一时文字起始列恒定对齐（主导航与底部账号区共用） */
+.nav-ico { display: inline-flex; width: 22px; justify-content: center; flex: none; }
+.side-foot { padding-top: 12px; border-top: 1px solid rgba(255,255,255,.12); }
+.foot-nav { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.foot-nav a { color: #cbd5e1; text-decoration: none; padding: 9px 12px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.foot-nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+.foot-nav a.active { background: var(--grad); color: #fff; box-shadow: 0 4px 16px rgba(59,130,246,.35), inset 0 1px 0 rgba(255,255,255,.25); }
+.section-title { font-size: 16px; margin: 4px 0 12px; letter-spacing: .03em; }
+
+/* 修改密码：居中卡片 */
+.pw-wrap { display: flex; justify-content: center; padding-top: 5vh; }
+.pw-card { width: 100%; max-width: 480px; margin: 0 auto; }
+
+.main { flex: 1; min-width: 0; padding: 16px 20px 40px; }
+.card { background: var(--panel); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(37,99,235,.10); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(30,64,175,.08), inset 0 1px 0 rgba(255,255,255,.9); }
+.card h2 { margin: 0 0 12px; font-size: 17px; letter-spacing: .02em; }
+.card h3 { margin: 0 0 10px; font-size: 15px; letter-spacing: .02em; }
+.planbar { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; padding: 12px 18px; }
+.planbar-label { font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.phase { color: var(--blue); font-weight: 600; font-size: 13px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { font-size: 12px; padding: 3px 9px; border-radius: 999px; background: #EEF3FA; color: #334155; border: 1px solid rgba(30,64,175,.07); }
+.chip.green { background: #E6F6EC; color: var(--green); border-color: rgba(22,163,74,.18); }
+.chip.orange { background: #FDF1E0; color: var(--orange); border-color: rgba(217,119,6,.2); }
+.chip.grey { background: #E8EDF3; color: var(--muted); border-color: rgba(100,116,139,.15); }
+
+/* v2.3：一屏自适应布局（排班表页）——主区域锁高为视口高度，页面不滚动，
+   月历在卡片内 flex 占满剩余高度，行高由 --cellh 决定。
+   仅在桌面（>=901px）或手机横屏矮屏（<=900px 且高度<=500px）时启用严格一屏；
+   手机竖屏不锁高，页面可纵向滚动（宽度仍自适应）。 */
+.card.slim { padding: 10px 14px; margin-bottom: 10px; }
+.progress-card .hint { margin-top: 4px; line-height: 1.5; }
+.sheet-fit { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.sheet-flex { flex: 1; min-height: 0; display: flex; }
+.sheet-card { flex: 1; min-width: 0; display: flex; flex-direction: column; margin-bottom: 0; }
+.sheet-card .grid-wrap.fit-wrap { flex: 1; min-height: 0; overflow: auto; }
+.sheet-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 0 10px; }
+.sheet-title-row .grid-title { flex: 1 1 auto; margin: 0; }
+.st-zone { display: flex; align-items: center; gap: 8px; }
+.st-left { justify-content: flex-start; }
+.st-right { justify-content: flex-end; margin-left: auto; }
+.st-progress { display: none; font-size: 12px; color: var(--muted); white-space: nowrap; }
+/* v5.1：「只看本人」圆形图标按钮（成员合并页标题行左区、紧贴「保存」左侧）：
+   直径 34px 圆形、无文字（内嵌单人头像 SVG，currentColor）；桌面默认隐藏
+   （DOM 占位以保左区顺序统一），仅手机端显示——竖屏/平板 <=760px，或
+   横屏矮屏段（<=900px 且高度 <=500px，与本表 compact 段口径一致）。
+   开启态（.on）填充主题渐变（青→蓝→紫）、图标变白，表示正在生效；
+   padding 归零用双类选择器压过 .sheet-title-row button 的通用内距。 */
+.only-me-btn { display: none; width: 34px; height: 34px; flex: none; border-radius: 50%; align-items: center; justify-content: center; color: var(--muted); }
+.sheet-title-row .only-me-btn { padding: 0; }
+.only-me-btn svg { display: block; }
+.only-me-btn.on { background: var(--grad); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(59,130,246,.30), inset 0 1px 0 rgba(255,255,255,.35); }
+@media (max-width: 760px), (max-width: 900px) and (max-height: 500px) {
+  .only-me-btn { display: inline-flex; }
+}
+@media (min-width: 901px), (max-width: 900px) and (max-height: 500px) {
+  body.fit-view .main { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; padding-bottom: 12px; }
+  body.fit-view #view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  body.fit-view .planbar { margin-bottom: 10px; padding: 8px 14px; }
+}
+
+.toolbar-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.toolbar-row .spacer { flex: 1; }
+.form-grid { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+.form-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: #475569; }
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px 22px; font-size: 14px; }
+.kv b { color: var(--muted); font-weight: 500; margin-right: 8px; }
+
+/* 姓名右侧标签（类别/组别）——v2.6：标签文字不换行，配合姓名列加宽保证单行；
+   v4.2：可读性——字号 11→13px、字重 600、底色加深提高对比（老同志易读） */
+.tag { font-size: 13px; padding: 2px 8px; border-radius: 999px; background: #E8EEF7; color: #334E68; font-weight: 600; white-space: nowrap; }
+.tag.leader { background: #D7E3FF; color: #1D4ED8; }
+.tag.assistant { background: #EDDEFF; color: #6D28D9; }
+
+/* 排班表 */
+.grid-wrap { overflow-x: auto; }
+.grid-title { text-align: center; margin: 2px 0 12px; font-size: 18px; letter-spacing: .03em; }
+table.grid { border-collapse: collapse; width: 100%; font-size: 15px; }
+/* v4.9：网格线加深——原边框 #D8E1EE 与满员灰底 #DCDCDC 几乎同明度，灰色整列
+   相连时格线消失、连成一片看不清格子轮廓；边框统一改 #A9BAD3（蓝灰，对白底、
+   周末淡玫红、满员灰底、表头 #EEF3FA、统计琥珀浅底都有明确对比），仍为 1px，
+   布局与尺寸一概不动。作用域仅 table.grid；选择层按钮与 table.mini（走
+   var(--line)）不受影响 */
+table.grid th, table.grid td { border: 1px solid #A9BAD3; text-align: center; padding: 2px 1px; min-width: 22px; }
+/* 表头两行（日期+星期）高度随 --cellh 缩放：0.5*cellh + 18px，与 fitGrids 的拟合公式一致；
+   v4.2：可读性——日期 13→14px、星期 10→11px，文字改最深墨色/深灰蓝（高度公式不变） */
+table.grid th { background: var(--head-bg); color: var(--ink); height: calc(var(--cellh, 54px) * 0.5 + 18px); font-size: 14px; line-height: 1.15; }
+table.grid th small { font-size: 11px; color: #43536B; }
+/* v2.5：「类别」列删除后姓名列成为最左列，sticky 偏移归 0；
+   姓名文字距左边框留 10px 内距（加在单元格上，不影响 .nm-eq 等宽 span）。
+   v2.6：姓名列加宽到 176px——三字名（3em≈42px）+ 职务/组别两枚标签
+   （11px 字号约 47+36px）+ 间距单行放下，标签不再折成两行。
+   v4.2：可读性放大后重新核算（列宽仍 176px 不变）——姓名 17px 时 3em≈51px
+   + .nm-flex 间距 6 + 领导标签（副科长 13px×3≈39 + 内距 16 = 55px）+ 标签
+   间距 4 + 组别标签（A组≈20 + 内距 16 = 36px）≈ 152px，再加左内距 10px
+   ≈ 162px ≤ 176px ✓ 单行仍放得下。 */
+table.grid td.name, table.grid th.name { width: 176px; min-width: 176px; font-weight: 600; background: var(--head-bg); position: sticky; left: 0; }
+table.grid td.name { padding-left: 10px; }
+.nm-flex { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; flex-wrap: nowrap; }
+/* v4.2：姓名是网格里最常看的信息——17px/700/最深墨色，老同志可读性优先 */
+.nm-name { text-align: left; white-space: nowrap; font-size: 17px; font-weight: 700; color: var(--ink); }
+/* v2.3：姓名等宽——固定 3em 宽 + 两端对齐，两字名自动拉开与三字名同宽 */
+.nm-eq { display: inline-block; width: 3em; text-align: justify; text-align-last: justify; }
+/* v4.1：姓名状态色回到亮底取值（已提交=绿、已保存未提交=橙、未提交=默认墨色），
+   与 v4.0 的深底提亮版相对应——用户明确要求换回亮色 */
+.nm-name.st-submitted { color: #16A34A; font-weight: 800; }
+.nm-name.st-draft { color: #EA580C; font-weight: 800; }
+.nm-tags { display: flex; gap: 4px; margin-left: auto; flex-wrap: nowrap; }
+/* v2.5：统计行标签格（原与「类别」列合并的 colspan 格）——占姓名列宽，sticky 固定在左侧，
+   sticky 需不透明底，用与统计行同色的实色琥珀浅底 */
+table.grid tr.stats td.stats-label { position: sticky; left: 0; text-align: left; padding-left: 10px; background: #FFF8E1; white-space: nowrap; }
+/* v6.5：周末列底色改回浅粉 #FFF1F2（v6.4 的淡蓝灰被用户否掉）；
+   整列着色（含表头/统计行）规则见文末 v6.5 段。 */
+table.grid td.weekend { background: #FFF1F2; }
+/* v2.3：行高自适应——先写固定值回退（无 JS 时 54px/18px），再由 var(--cellh) 覆盖；
+   v4.2：符号是老同志最常看的内容——字号钳制 13~18px 抬到 14~19px 并加粗 600
+   （行高由 --cellh 固定，字号变大不影响一屏拟合公式） */
+table.grid td.cell { height: 54px; height: var(--cellh, 54px); font-size: 19px; font-size: clamp(14px, calc(var(--cellh, 54px) * 0.34), 19px); font-weight: 600; }
+table.grid td.cell.editable { cursor: pointer; }
+table.grid td.cell.editable:hover { outline: 2px solid var(--blue); outline-offset: -2px; background: rgba(37,99,235,.04); }
+table.grid td.cell.auto { background: #E3F0FF; }
+table.grid td.cell.fromsource { background: #EAFAF0; }
+table.grid td.cell.dirty { outline: 2px solid #F59E0B; outline-offset: -2px; font-weight: 700; }
+/* 合计列强调（数值加大加粗 + 蓝色微光底；v4.2：15px/700） */
+table.grid tr:not(.stats) > td:last-child { font-weight: 700; font-size: 15px; background: rgba(37,99,235,.04); }
+/* 统计行高度随 --cellh 缩放：0.45*cellh + 8px，与 fitGrids 的拟合公式一致；
+   v4.2：字号下限 11→12px */
+table.grid tr.stats td { background: #FFF8E1; font-weight: 600; height: calc(var(--cellh, 54px) * 0.45 + 8px); font-size: clamp(12px, calc(var(--cellh, 54px) * 0.26), 14px); }
+table.grid tr.stats td.stat-bad { background: #FEE2E2; color: #B91C1C; }
+/* v2.5：网格下方图例/说明样式已随图例区块一并删除 */
+
+/* 通用小表格 */
+table.mini { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.mini th, table.mini td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+table.mini th { background: #F4F7FB; }
+table.mini tbody tr:nth-child(even) { background: rgba(15,23,42,.02); }
+table.mini tbody tr:hover { background: rgba(37,99,235,.05); }
+table.mini input, table.mini select { padding: 4px 6px; font-size: 13px; }
+
+/* 符号选择层 */
+/* v2.7：高度钳制在视口内（上下各留 8px），放不下时整层内部纵向滚动，
+   配合 app.js 的 placePicker 翻转/钳制定位，保证最下面一行选项也可达 */
+.picker { position: fixed; z-index: 60; background: rgba(255,255,255,.96); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(37,99,235,.14); border-radius: 12px; box-shadow: 0 18px 44px rgba(15,35,70,.18), inset 0 1px 0 rgba(255,255,255,.9); padding: 10px; width: min(320px, 92vw); max-height: calc(100dvh - 16px); overflow-y: auto; }
+.picker-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 8px; }
+.picker-head button { border: none; background: transparent; color: var(--ink); font-size: 18px; padding: 0 6px; }
+.picker-head button:hover { background: transparent; color: var(--blue); }
+/* v2.7：选项按钮等高——每行 1fr 等分，长名称在按钮内换行不撑高本行
+   【v5.0 取代】1fr 在面板被 max-height 钳到视口高时，会把钳制后的高度等分
+   给每一行——手机横屏上面板占满整屏、每行被拉到近百像素（用户截图反馈）。
+   改固定行高 54px：行高恒定、等高不变（按钮默认 stretch 填满整行），
+   6 行 × 54 + 间距 ≈ 354px 为内容自然高，超出时回到 .picker 层内滚动。 */
+.picker-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 54px; gap: 6px; }
+.picker-grid button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 2px; background: rgba(255,255,255,.7); border: 1px solid #D8E1EE; }
+.picker-grid button:hover { border-color: rgba(34,211,238,.7); background: rgba(34,211,238,.07); box-shadow: 0 0 0 1px rgba(34,211,238,.25), 0 4px 14px rgba(34,211,238,.12); }
+.picker-grid button .sym { font-size: 17px; font-weight: 700; }
+.picker-grid button .nm { font-size: 12px; color: #5B6B84; }
+.picker-clear { width: 100%; margin-top: 8px; }
+
+/* v5.0：小屏选择层紧凑化（手机竖屏 <=640px，或横屏矮屏高度 <=500px，
+   与本表既有 640 / 500 断点口径一致），行高固定不再拉伸。
+   【v5.2 再紧缩】v5.0 的 3 列 × 46px 在安卓横屏上仍占约 85% 屏高，
+   且「探亲假（单身）/（四年）」在 46px 行内换行溢出、下方行仍需滚动
+   （用户截图反馈）。改为 4 列 × 44px：19 项排 5 行，选项区
+   5*44 + 4*6 = 244px，整层约 320px；面板相应放宽到 min(344px, 94vw)
+   （以宽换高）；名称降到 10.5px 并 nowrap 不换行——最长名
+   「探亲假（单身）」7 字 × 10.5px ≈ 74px，列宽约 78px、按钮横向
+   内距 2px 恰可容纳。放不下时仍由 .picker 的 max-height + 层内滚动兜底 */
+@media (max-width: 640px), (max-height: 500px) {
+  .picker { width: min(344px, 94vw); padding: 8px; }
+  .picker-head { font-size: 14px; margin-bottom: 6px; }
+  .picker-grid { grid-template-columns: repeat(4, 1fr); grid-auto-rows: 40px; gap: 6px; }
+  .picker-grid button { padding: 6px 2px; }
+  .picker-grid button .sym { font-size: 17px; }
+  .picker-grid button .nm { font-size: 10.5px; white-space: nowrap; }
+  .picker-clear { margin-top: 6px; }
+}
+
+/* v5.3（随 v6.0 一并交付）：横屏矮屏（高度 ≤500px）专用再收紧一段——
+   上段小屏口径行高已由 44px 收到 40px；矮屏再切 5 列 × 38px：
+   19 项排 4 行，选项区 4*38 + 3*5 = 167px，整层约 250px，
+   不再占大半屏；面板放宽到 min(400px, 94vw) 换取列宽，
+   名称 10px nowrap（最长名 7 字 × 10px ≈ 70px，列宽约 72px 可容纳）。
+   本段在上段之后、同等优先级下后写者胜，故仅需覆盖差异项。 */
+@media (max-height: 500px) {
+  .picker { width: min(400px, 94vw); padding: 6px; }
+  .picker-head { font-size: 13px; margin-bottom: 5px; }
+  .picker-grid { grid-template-columns: repeat(5, 1fr); grid-auto-rows: 38px; gap: 5px; }
+  .picker-grid button { padding: 3px 1px; }
+  .picker-grid button .sym { font-size: 15px; }
+  .picker-grid button .nm { font-size: 10px; white-space: nowrap; }
+  .picker-clear { height: 30px; font-size: 12px; padding: 0 12px; margin-top: 5px; }
+}
+
+/* toast */
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #1E293B; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px; box-shadow: 0 8px 24px rgba(15,23,42,.25); z-index: 80; max-width: 86vw; text-align: center; }
+.toast.bad { background: #B91C1C; }
+
+/* ================= v2.3 移动端适配 ================= */
+/* <=900px：侧边栏塌缩为顶部横条；月历改为 fixed 布局整宽平分，不再横向滚动 */
+@media (max-width: 900px) {
+  .app { flex-direction: column; }
+  .sidebar { width: 100%; flex: none; height: auto; position: static; padding: 8px 10px;
+             flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+  .brand { border-bottom: none; padding: 0; gap: 8px; }
+  .brand-badge { width: 28px; height: 28px; border-radius: 8px; font-size: 15px; }
+  .brand-name { font-size: 14px; }
+  .brand-sub { display: none; }
+  .user-card { border-bottom: none; padding: 0; display: flex; gap: 8px; align-items: baseline; }
+  .nav { flex-direction: row; flex-wrap: nowrap; overflow-x: auto; padding: 0; flex: 1 1 auto; gap: 4px; }
+  .nav .nav-section { display: none; }
+  .nav a { padding: 6px 10px; white-space: nowrap; font-size: 13px; }
+  .side-foot { border-top: none; padding: 0; display: flex; gap: 8px; align-items: center; }
+  .foot-nav { flex-direction: row; margin: 0; }
+  .foot-nav a { padding: 6px 10px; font-size: 13px; white-space: nowrap; }
+  .side-foot button { width: auto; padding: 6px 10px; font-size: 13px; }
+  .main { padding: 8px; }
+  .card { padding: 10px 12px; margin-bottom: 8px; }
+  .card.slim { padding: 8px 10px; margin-bottom: 8px; }
+  .planbar { padding: 8px 10px; gap: 8px; margin-bottom: 8px; }
+  .phase { font-size: 12px; }
+  .sheet-title-row { margin-bottom: 6px; gap: 6px; }
+  .sheet-title-row .grid-title { order: -1; flex-basis: 100%; font-size: 16px; }
+  .st-left, .st-right { min-width: 0; }
+  .st-right { margin-left: auto; }
+  .sheet-title-row button { padding: 6px 10px; font-size: 13px; }
+  table.grid th, table.grid td { padding: 2px 0; }
+  table.grid td.name { padding-left: 6px; } /* v2.5：移动端姓名左内距 6px */
+  table.grid th { font-size: 11px; }
+  table.grid th small { font-size: 9px; }
+  table.grid td.cell { font-size: 13px; }
+  /* v2.6：移动端同样单行不折行；v4.2：可读性——姓名 12→13px、标签 9→11px/600
+     （姓名列随之加宽，见 641~900 与 <=640 两段的 v4.2 核算） */
+  .nm-flex { flex-wrap: nowrap; gap: 2px 4px; }
+  .nm-name { font-size: 13px; }
+  .nm-tags { margin-left: 0; gap: 2px; }
+  .nm-tags .tag { font-size: 11px; font-weight: 600; padding: 1px 6px; }
+  .picker-grid button { padding: 5px 1px; }
+  .login-card { padding: 26px 22px; }
+}
+
+/* 641~900px（平板与手机横屏）：fixed 布局整宽平分——姓名 132px、合计 30px，
+   其余由 30 个日期列平分，无横向滚动，整表一屏。
+   （v2.5：原「类别」列 34px 已删除，宽度让给姓名列与日期列，姓名列 sticky 偏移归 0；
+    v2.6：姓名列 100→112px + 标签 9px 紧凑字号，姓名+两枚标签仍单行：
+    3em≈36px + 标签约 35+26px + 间距 ≈ 101px ≤ 112px-内距 6px；
+    v4.2：标签放大到 11px/600、姓名 13px，姓名列 112→132px 重新核算：
+    3em≈39px + 间距 4 + 领导标签（副科长 11px×3≈33 + 内距 12 = 45px）+ 标签
+    间距 2 + 组别标签（≈16 + 内距 12 = 28px）≈ 118px + 左内距 6px ≈ 124px
+    ≤ 132px ✓；850px 宽时日期列由约 21.1px 降到约 20.4px（每列少约 0.7px），仍可读） */
+@media (max-width: 900px) and (min-width: 641px) {
+  .grid-wrap { overflow-x: hidden; }
+  table.grid { table-layout: fixed; }
+  table.grid th, table.grid td { min-width: 0; }
+  table.grid th.name, table.grid td.name { width: 132px; min-width: 0; left: 0; }
+  table.grid th:last-child, table.grid td:last-child { width: 30px; }
+}
+
+/* <=640px（手机竖屏为主）：整宽塞 30 天会让日期列只剩约 6px、符号比列还宽不可读，
+   故竖屏保留适度横向滚动：日期列保持 22px 可读宽，姓名列 sticky 固定在左侧，
+   滚动时始终可见；日期仅数字、星期隐藏。横屏（>=641px）则走上面的整宽一屏。 */
+@media (max-width: 640px) {
+  /* v2.6：姓名列 84→104px（9px 标签单行约需 101px，横向滚动布局下由内容兜底）；
+     v4.2：标签 11px + 姓名 13px 后单行约需 124px，姓名列同步 104→124px */
+  table.grid th.name, table.grid td.name { width: 124px; min-width: 124px; left: 0; }
+  table.grid th { font-size: 10px; }
+  table.grid th small { display: none; }
+  table.grid td { font-size: 10px; }
+  table.grid td.cell { font-size: 12px; }
+  table.grid tr.stats td { font-size: 10px; }
+  .phase { max-width: 52vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* 手机横屏矮屏（<=900px 宽且高度<=500px）：极致紧凑，整页一屏——
+   隐藏我的进度卡（进度改在标题行左侧显示）、表头只留日期数字、图例单行可横滑 */
+@media (max-width: 900px) and (max-height: 500px) {
+  /* 顶栏与主区共同占满 100dvh（移动端为纵向 flex，不能再让 main 单独 100dvh） */
+  body.fit-view .app { height: 100dvh; }
+  body.fit-view .main { height: auto; flex: 1; min-height: 0; }
+  .sidebar { padding: 4px 8px; gap: 2px 10px; }
+  .brand-badge { width: 24px; height: 24px; font-size: 13px; }
+  .user-role { display: none; }
+  .main { padding: 6px; }
+  .planbar { padding: 2px 6px; margin-bottom: 4px; }
+  .planbar-label { font-size: 13px; }
+  .planbar select { padding: 2px 4px; font-size: 12px; }
+  .planbar .chips { display: none; }
+  .phase { font-size: 11px; max-width: 44vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card { padding: 4px 6px; }
+  .progress-card { display: none; }
+  .st-progress { display: inline; }
+  .sheet-title-row { margin-bottom: 4px; }
+  .sheet-title-row .grid-title { order: 0; flex-basis: auto; font-size: 14px; }
+  .sheet-title-row button { padding: 4px 8px; font-size: 12px; }
+  /* 表头单行化（仅日期数字）：高度 0.3*cellh + 8px，与 fitGrids 的 compact 公式一致 */
+  table.grid th { height: calc(var(--cellh, 54px) * 0.3 + 8px); padding: 1px 0; }
+  table.grid th small { display: none; }
+  table.grid td { padding: 1px 0; }
+  table.grid td.cell { font-size: 12px; }
+  table.grid tr.stats td { line-height: 1.2; }
+  /* 姓名格只留姓名（职务标签隐藏），保证单行不撑高；v4.2：姓名 11→12.5px */
+  .nm-tags { display: none; }
+  .nm-name { font-size: 12.5px; }
+  /* v4.5：图例条改单行横滑，只占一行高度，纵向空间优先留给网格 */
+  .sheet-legend { flex-wrap: nowrap; overflow-x: auto; gap: 4px 12px; padding: 4px 2px 0; margin-top: 4px; }
+}
+
+/* ================= 日志管理状态 chip（v2.4 引入，v2.6 沿用） ================= */
+.chip.red { background: #FDE8E8; color: var(--red); border-color: rgba(220,38,38,.15); }
+.chip.violet { background: #F1EAFD; color: #6D28D9; border-color: rgba(109,40,217,.15); }
+/* v2.6：待审批单元格标记样式（.pending-adj/.adj-mark）已随审批流撤销删除 */
+/* 登录日志 UA 列截断显示，悬停看全文 */
+.ua-cell { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ================= v2.9 布局 ================= */
+/* 数据管理页「退回提交」一行小控件（下拉 + 按钮，嵌在工作流按钮行内） */
+.inline-ctl { display: inline-flex; gap: 6px; align-items: center; }
+/* 日志管理：修改记录与登录日志左右并排（v4.0 改为等宽各半 1fr/1fr），各自独立成卡；
+   表格字号略小、单元格可换行、UA 列在窄列里收紧截断，保证不横向溢出 */
+.logs-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.logs-cols .card { margin-bottom: 0; }
+.logs-cols table.mini { font-size: 13px; }
+.logs-cols table.mini td { word-break: break-word; }
+.logs-cols .ua-cell { max-width: 170px; }
+@media (max-width: 1100px) {
+  .logs-cols { grid-template-columns: 1fr; }
+  .logs-cols .card { margin-bottom: 16px; }
+  .logs-cols .card:last-child { margin-bottom: 0; }
+}
+
+/* ================= v3.0 ================= */
+/* v3.0 的独立瘦身条已在 v3.1 并入网格标题行（见文末 v3.1 段），本组规则删除；
+   .sb-status 样式移至 v3.1 段。 */
+
+/* 人员与权限：一屏自适应——页面骨架纵向 flex 占满（fit-view 锁高时不滚页），
+   新增人员表单压成一行，人员表格卡占满剩余高度、行高压缩，极矮时表格区内部滚动兜底 */
+.people-fit { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.people-fit .section-title { margin: 0 0 10px; flex: none; }
+#peoplePermsSection { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.people-add-card { flex: none; padding: 10px 14px; margin-bottom: 10px; }
+.people-add-card h3 { margin-bottom: 6px; }
+.people-add-card .form-grid { flex-wrap: nowrap; }
+.people-table-card { flex: 1; min-height: 0; overflow: auto; padding: 10px 14px; margin-bottom: 0; }
+.people-table-card table.mini th, .people-table-card table.mini td { padding: 3px 6px; }
+@media (max-width: 900px) {
+  .people-add-card .form-grid { flex-wrap: wrap; }
+  .sb-status { white-space: normal; }
+}
+
+/* ================= v3.1 ================= */
+/* 1) 超管合并排班表：状态小字并入网格标题行左区（层标签之后），单行超宽省略；
+   右区按钮组（工作流 + 导出）放不下时在标题行内换行，不再有独立瘦身条卡片 */
+.sheet-title-row .st-left { min-width: 0; }
+.sheet-title-row .st-right { flex-wrap: wrap; justify-content: flex-end; }
+.sb-status { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.sheet-title-row select { padding: 5px 7px; }
+
+/* 2) 人员与权限合并表：控件字体/字号/高度与表格文本统一，整表垂直居中对齐 */
+.people-table-card table.mini th, .people-table-card table.mini td { vertical-align: middle; }
+.people-table-card table.mini input:not([type="checkbox"]),
+.people-table-card table.mini select,
+.people-table-card table.mini button {
+  font: inherit; font-size: 13px; height: 28px; line-height: normal;
+  box-sizing: border-box; vertical-align: middle;
+}
+.people-table-card table.mini input[type="checkbox"] { width: 16px; height: 16px; margin: 0; vertical-align: middle; }
+
+/* 3) 日志管理美化 + 筛选工具栏：卡头标题带计数徽标，表格斑马纹与悬停高亮，
+   工具栏为玻璃细条（筛选逻辑在 app.js，纯前端过滤已加载数据） */
+.logs-col > h3 { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 0 0 6px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.log-count { margin-left: auto; flex: none; font-size: 12px; font-weight: normal; color: var(--muted); background: #EEF2F7; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.log-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0 10px; padding: 7px 10px; background: #F8FAFC; border: 1px solid var(--line); border-radius: 8px; font-size: 13px; color: var(--muted); }
+.log-tools select, .log-tools input { font-size: 13px; padding: 4px 6px; }
+.log-tools input[type="text"] { width: 110px; }
+.log-tools button { padding: 4px 10px; font-size: 13px; }
+.logs-cols table.mini tbody tr:nth-child(even) { background: #F8FAFC; }
+.logs-cols table.mini tbody tr:hover { background: #EEF4FF; }
+.logs-cols td.empty-row { text-align: center; color: var(--muted); padding: 14px 8px; }
+
+/* ================= v4.0/v4.1 科技主题细节 ================= */
+/* 细滚动条（v4.1 改亮色）、选区、键盘焦点环、勾选框强调色 */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(30,64,175,.18); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(34,211,238,.35); border: 2px solid transparent; background-clip: content-box; }
+::selection { background: rgba(34,211,238,.30); }
+button:focus-visible, a:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(34,211,238,.25); }
+input[type="checkbox"] { accent-color: #2563EB; }
+
+/* ================= v4.3 日志管理：20 行划线 + 时间筛选 ================= */
+/* 表格滚动区：高度固定划为「表头 34px + 20 行 × 32px」，记录不足 20 条时
+   区域保持同样高度（行下方留空）；超出在区内滚动，thead 粘性置顶不走。
+   行高统一：数据行 32px、表头 34px（border-box，含内距），空行不受此限。
+   ≤1100px 堆叠时每卡仍按此上限显示 20 行，页面在两张卡之间滚动。
+   桌面一屏锁定（fit-view）时的伸缩规则见紧随其后的媒体查询段。 */
+.log-scroll { overflow-y: auto; height: calc(34px + 20 * 32px); max-height: calc(34px + 20 * 32px); }
+.logs-cols table.mini thead th { position: sticky; top: 0; z-index: 2; height: 34px; background: #F4F7FB; }
+.logs-cols table.mini tbody td { height: 32px; }
+.logs-cols table.mini tbody td.empty-row { height: auto; }
+/* 工具栏「从/到」日期输入与其它筛选控件同字号同高 */
+.log-tools input[type="date"] { width: 138px; }
+
+/* fit-view 一屏锁定时：日志网格占满 #view 的剩余高度。
+   并排（≥1101px）：网格单行等高，卡片改纵向 flex（标题/工具栏固定，
+   滚动区 flex 伸缩）——视口够高时滚动区恰为 20 行上限（max-height 钳制），
+   矮屏时随卡片可用高度收窄、区内滚动，整页不溢出。
+   堆叠（≤1100px 且处于 fit-view 媒体范围）：网格自身纵向滚动，
+   在两张卡之间翻页，每卡滚动区仍保持 20 行上限。
+   手机竖屏不在 fit-view 媒体范围内，页面保持普通流式滚动。 */
+@media (min-width: 901px), (max-width: 900px) and (max-height: 500px) {
+  body.fit-view .logs-cols { flex: 1; min-height: 0; }
+}
+@media (min-width: 1101px) {
+  body.fit-view .logs-cols { grid-template-rows: minmax(0, 1fr); align-items: start; }
+  body.fit-view .logs-col { display: flex; flex-direction: column; min-height: 0; max-height: 100%; }
+  body.fit-view .logs-col > h3, body.fit-view .logs-col .log-tools { flex: none; }
+  body.fit-view .log-scroll { flex: 1 1 auto; min-height: 0; }
+}
+@media (min-width: 901px) and (max-width: 1100px), (max-width: 900px) and (max-height: 500px) {
+  body.fit-view .logs-cols { overflow-y: auto; }
+}
+
+/* ================= v4.4 日志管理：占位行 + 全表严格等高 ================= */
+/* 1) 占位行：显示行不足 20 行时由 app.js 的 logFillerRows 补 .filler-row
+   凑满 20 行版面——行高与数据行同为 32px（不适用 .empty-row 的
+   height:auto），边框沿用表格常色、单元格无文字，读作空格位；
+   斑马纹按 nth-child 顺延到占位行。
+   2) 严格等高：两表改 fixed 布局并按下方的 th 宽度分配列宽，全部 td
+   单行显示、超长内容省略号截断——覆盖 v2.9 的 word-break: break-word，
+   「变更（旧→新）」、UA 等长文本不再换行撑高，左右两表逐行对齐、
+   行高同为 32px（表头 34px 沿用 v4.3）；变更列与 UA 列带 title 悬停全文。
+   空状态行（.empty-row）除外：保持居中换行与 height:auto（v4.3 口径）。 */
+.logs-cols table.mini { table-layout: fixed; }
+.logs-cols table.mini thead th { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.logs-cols table.mini tbody td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; word-break: normal; line-height: 1.3; }
+/* 3) 字体统一：日志页作用域内表头/单元格/chip/工具栏（标签/下拉/输入/按钮）
+   一律 inherit 正文字体、13px（与人员表一致）——原 12px 规则已在原处改
+   13px，本段再兜底 chip 与控件的 font-family；卡头标题 15px 与计数徽标
+   12px 保持标题层级，两卡共用同一规则、天然一致。chip 在日志内收紧
+   上下内距，确保 13px 下整行仍严格 32px 不被 chip 撑高。 */
+.logs-cols table.mini th, .logs-cols table.mini td, .logs-cols .chip,
+.log-tools, .log-tools select, .log-tools input, .log-tools button { font-family: inherit; }
+.logs-cols .chip { font-size: 13px; padding: 1px 8px; line-height: 1.3; }
+.logs-cols table.mini tbody td.empty-row { white-space: normal; overflow: visible; }
+.logs-cols table.mini tbody tr.filler-row td { height: 32px; }
+/* 列宽分配（fixed 布局按首行 th 宽度取列宽）：左卡修改记录 6 列、右卡登录日志 5 列 */
+.logs-cols > .logs-col:first-child table.mini th:nth-child(1) { width: 20%; }
+.logs-cols > .logs-col:first-child table.mini th:nth-child(2) { width: 10%; }
+.logs-cols > .logs-col:first-child table.mini th:nth-child(3) { width: 10%; }
+.logs-cols > .logs-col:first-child table.mini th:nth-child(4) { width: 15%; }
+.logs-cols > .logs-col:first-child table.mini th:nth-child(5) { width: 27%; }
+.logs-cols > .logs-col:first-child table.mini th:nth-child(6) { width: 18%; }
+.logs-cols > .logs-col:last-child table.mini th:nth-child(1) { width: 20%; }
+.logs-cols > .logs-col:last-child table.mini th:nth-child(2) { width: 12%; }
+.logs-cols > .logs-col:last-child table.mini th:nth-child(3) { width: 10%; }
+.logs-cols > .logs-col:last-child table.mini th:nth-child(4) { width: 18%; }
+.logs-cols > .logs-col:last-child table.mini th:nth-child(5) { width: 40%; }
+
+/* ================= v4.5 排班表符号图例条 ================= */
+/* 排班表卡片内页脚（.sheet-card 的最后一个 flex 子项，位于网格滚动区
+   下方）：flex-none 不参与网格测高——fitGrids 按网格区 clientHeight
+   计算 --cellh，页脚占高后网格区自动变矮、整页仍保持一屏。
+   内容由 app.js 的 sheetLegendHTML() 用 SYMBOLS 数据生成，与选符号
+   弹层同源、改名自动同步。v2.5 删除的是网格下方独立成块的旧图例；
+   本条按用户 v4.5 要求以卡片页脚形态恢复，仅出现在排班表卡片内。 */
+.sheet-legend { flex: none; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline;
+  border-top: 1px solid var(--line); padding: 8px 4px 2px; margin-top: 10px; }
+.sheet-legend .lg-label { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.sheet-legend .lg-item { font-size: 13px; color: var(--ink); white-space: nowrap; }
+.sheet-legend .lg-item b { font-size: 15px; font-weight: 700; margin-right: 4px; }
+
+/* ================= v6.0 当日排班 ================= */
+/* 生成当日排班页（管理员）与岗位显示页（成员）共用样式；
+   字号按可读性口径不小于 13px、正文 14px。 */
+.seg-toggle { display: inline-flex; border: 1px solid #C9D2DD; border-radius: 8px; overflow: hidden; }
+.seg-toggle button { border: none; border-radius: 0; background: rgba(255,255,255,.7); padding: 7px 20px; font-size: 14px; }
+.seg-toggle button.on { background: var(--grad); color: #fff; font-weight: 600; }
+.daily-controls { align-items: center; }
+.daily-actions { margin: 10px 0 4px; }
+.daily-actions button:disabled { opacity: .45; cursor: not-allowed; }
+.daily-table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 6px 0 14px; }
+/* v6.9：成员「当日排班」整表在窄屏横向滚动（不压缩字号/不折行挤压） */
+.daily-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.daily-scroll .daily-table { min-width: 560px; }
+.daily-table th, .daily-table td { border: 1px solid var(--line); padding: 6px 8px; text-align: center; }
+.daily-table th { background: #F4F7FB; font-weight: 600; }
+.daily-roster td:first-child { text-align: left; }
+.daily-roster td:last-child { color: var(--muted); font-size: 13px; }
+.letter-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+  border-radius: 8px; background: var(--grad); color: #fff; font-weight: 700; font-size: 15px; vertical-align: middle; }
+
+/* ================= v6.3 ================= */
+/* 1) 岗位显示 / 生成当日排班的日期控制行（.daily-controls，用户图1）：
+   四个控件（←前一天、日期标签+输入框、后一天→、回到明天）同高同线。
+   原 .form-grid 的 label 为纵向堆叠（文字在输入框上方），整组比按钮高
+   一截，.daily-controls 的 align-items:center 只能把按钮对齐到「标签+
+   输入」整块的中线，输入框与按钮视觉基线错位、高低不平。改：整行
+   交叉轴改 stretch 且直接子控件统一 38px 高；label 改横向排列（文字
+   与输入框同行居中），按钮文字以 inline-flex 居中；chip/提示文字
+   align-self:center 不被拉高。窄屏仍按 .form-grid 换行，每行内
+   各控件仍等高对齐。 */
+.daily-controls { align-items: stretch; }
+.daily-controls > button,
+.daily-controls > label,
+.daily-controls input[type="date"] { height: 38px; }
+.daily-controls > label { flex-direction: row; align-items: center; gap: 8px; }
+.daily-controls > button { display: inline-flex; align-items: center; justify-content: center; }
+.daily-controls .chip, .daily-controls .hint { align-self: center; }
+
+/* 2) 当日排班预览表（.daily-table，早班全时段表与晚班表共用，用户图2）：
+   原未设 vertical-align（初始值 baseline），同排姓名因各列内容
+   长短不一出现高低不平。统一改为 middle，并固定一致的内距与行高。
+   生成图片（早班）的离屏表格为内联样式，已在 app.js dailyImage
+   同步加 vertical-align:middle，PNG 与页面口径一致。 */
+.daily-table th, .daily-table td { vertical-align: middle; line-height: 1.5; padding: 7px 10px; }
+
+/* 3) 假期符号字形（用户图3）：body 字体首选 -apple-system，macOS 上
+   U+2713「✓」被渲染成带书法尾巴的花体勾，与 Excel 里的朴素两笔勾
+   不一致。所有显示假期符号的元素（排班表单元格、选符号弹层按钮、
+   表格底部图例）强制改用 PingFang/YaHei 字体栈——不含 -apple-system，
+   ✓ 渲染为朴素对勾。后端符号定义与数据不变，Excel 导出用其自身
+   字体不受影响；排班表 PNG 快照页面 DOM，自动继承本规则。 */
+table.grid td.cell, .picker-grid button .sym, .sheet-legend .lg-item b {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+
+/* ================= v6.4 ================= */
+/* 1) 排班表列色（v6.4 原为「宽裕整列天蓝 + 周末淡蓝灰」，已被
+   v6.5 按用户口径整体取代， operative 规则见文末 v6.5 段：
+   周末浅粉 #FFF1F2、天蓝只落干部在岗统计格。此处规则已撤下。） */
+
+/* 2) 已排满的日子不再压灰：原 .full 规则（#DCDCDC 灰底 + 灰字）已
+   整条删除、gridHTML 不再给满员空格挂 full 类。每日上限的点选预检
+   （checkDailyCaps）与后端保存校验不变，某天是否排满看页脚统计行。 */
+
+/* 3) 岗位显示「您的岗位」：字母只呈现一次——大号加粗强调色文字，
+   取代原「渐变徽章字母 + X 岗文字」的重复呈现（.letter-badge 规则
+   自此不再被使用，保留备查）。 */
+.post-big { font-size: 26px; font-weight: 800; color: var(--blue); padding: 0 3px; }
+
+/* 4) 岗位显示「人员」选人框（仅管理员/超管渲染）：与日期控制行同排，
+   select 与日期输入同高 38px，沿用 v6.3 的 .daily-controls 对齐口径。 */
+.daily-controls > label select { height: 38px; }
+
+/* ================= v6.5 ================= */
+/* 1) 排班表列色（用户对 v6.4 的修正口径）：
+   - 天蓝 #D9ECFF 只落一格：页脚「干部在岗人数」行中在岗 ≥6 那天
+     的格子（cadre-blue 类，渲染端只在该行按 stats 挂），其余两行
+     统计格与全部表头/人员格都不上天蓝；周末那天该格同样是蓝
+     （本规则与 tr.stats td.weekend 同特异性、后置胜出）。
+   - 其余日子人员格回白底；周六日整列浅粉 #FFF1F2（表头/人员格/
+     统计行），取代 v6.4 的淡蓝灰。人员格的粉底压过 .auto/.fromsource
+     来源浅底（同特异性、后写胜出，与 v6.4 列色口径一致）；统计行
+     的 stat-bad 警示红底特异性更高、不受影响。
+   网格线 #A9BAD3 在两种底色上都清晰可见。 */
+table.grid th.weekend { background: #FFF1F2; }
+table.grid td.cell.weekend { background: #FFF1F2; }
+table.grid tr.stats td.weekend { background: #FFF1F2; }
+table.grid tr.stats td.cadre-blue { background: #D9ECFF; }
+
+/* 2) 岗位显示「生成图片」按钮移入岗位行（用户口径）：岗位文字与
+   按钮同一 flex 行、垂直居中，按钮紧贴岗位文字右侧；窄屏允许
+   换行但不撑破行高。行内的 p 清掉默认外边距，间距由本行承担。 */
+.post-line { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 2px 0 4px; }
+.post-line p { margin: 0; }
+
+/* 3) 符号字体栈补覆盖（v6.3 规则的实测补漏）：v6.3 的三条选择器
+   经逐一对真实标记核验——网格人员格（裸文本在 td.cell 内）、弹层
+   （.picker-grid 内 button .sym）、图例（.lg-item b）均命中；但
+   还有两处符号渲染未被覆盖：①日志管理「变更（旧 → 新）」列的
+   符号是 table.mini 单元格里的裸文本（td.chg 为 v6.5 新挂类）；
+   ②岗位显示页头「当天休假（X）」的符号（.sym-glyph 包裹）。
+   两处补进同一字体栈（不含 -apple-system），与 v6.3 规则并列。 */
+table.mini td.chg, .sym-glyph {
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+
+/* ================= v6.7 ================= */
+/* 1) 排班表标题真居中（用户口径）：标题行由 flex 改为「1fr auto 1fr」
+   三列网格——左右两区各占 1fr、标题居于中间 auto 列，无论左右两区
+   宽窄差多少，标题恒在整行正中（此前 flex 下标题只在剩余空间里
+   居中，左右不对称就偏）。左区靠左、右区靠右，右区放不下仍在区内
+   换行（v3.1 口径保留）；成员/管理员排班表页与超管合并页共用此行。
+   导出图克隆里标题是标题行唯一子元素时跨满整行居中（v6.6 口径不变）。 */
+.sheet-title-row { display: grid; grid-template-columns: 1fr auto 1fr; }
+.sheet-title-row .grid-title { flex: none; }
+.sheet-title-row .st-left { justify-self: start; flex-wrap: wrap; }
+.sheet-title-row .st-right { justify-self: end; margin-left: 0; }
+.sheet-title-row > .grid-title:only-child { grid-column: 1 / -1; }
+@media (max-width: 900px) {
+  /* 窄屏沿用旧观感：标题独占首行居中，左右两区落到第二行两端 */
+  .sheet-title-row .grid-title { grid-column: 1 / -1; grid-row: 1; }
+  .sheet-title-row .st-left { grid-column: 1; grid-row: 2; }
+  .sheet-title-row .st-right { grid-column: 3; grid-row: 2; }
+}
+@media (max-width: 900px) and (max-height: 500px) {
+  /* 横屏矮屏紧凑段：标题仍与左右区同排（不另起一行、省高度），
+     三列网格照常居中——撤掉上一段窄屏的两行摆放 */
+  .sheet-title-row .grid-title { grid-column: auto; grid-row: auto; }
+  .sheet-title-row .st-left { grid-column: auto; grid-row: auto; }
+  .sheet-title-row .st-right { grid-column: auto; grid-row: auto; }
+}

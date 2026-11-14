@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+backend/duty.db
+*.xlsx
+.DS_Store

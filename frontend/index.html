@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F2F6FC">
+<title>示例科室排班系统</title>
+<link rel="stylesheet" href="static/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<!-- 登录 -->
+<div id="loginView" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">旅</div>
+    <h1>示例科室排班系统</h1>
+    <p class="sub">科室职能轮休排班 · 在线选休</p>
+    <label>用户名（本人姓名或工号；管理员填 admin）</label>
+    <input id="loginUser" type="text" placeholder="姓名或工号" autocomplete="username">
+    <label>密码</label>
+    <input id="loginPass" type="password" autocomplete="current-password">
+    <button id="loginBtn" class="primary wide">登 录</button>
+    <p id="loginErr" class="err"></p>
+  </div>
+</div>
+
+<!-- 主框架：左侧目录 + 内容区 -->
+<div id="appView" class="app hidden">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-badge">旅</div>
+      <div>
+        <div class="brand-name">示例科室排班</div>
+        <div class="brand-sub">在线选班</div>
+      </div>
+    </div>
+    <div class="user-card">
+      <div id="whoName" class="user-name"></div>
+      <div id="whoRole" class="user-role"></div>
+    </div>
+    <nav id="mainNav" class="nav"></nav>
+    <div class="side-foot">
+      <div id="footNav" class="foot-nav"></div>
+      <button id="logoutBtn" class="ghost wide">退出登录</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="planbar card">
+      <label class="planbar-label">排班计划
+        <select id="planSelect"></select>
+      </label>
+      <span id="phaseInfo" class="phase"></span>
+      <span id="planState" class="chips"></span>
+    </div>
+    <div id="view"></div>
+  </main>
+</div>
+
+<!-- 符号选择弹出层 -->
+<div id="picker" class="picker hidden">
+  <div class="picker-head"><span id="pickerTitle"></span><button id="pickerClose">×</button></div>
+  <div id="pickerGrid" class="picker-grid"></div>
+  <button id="pickerClear" class="picker-clear">清除（正常上班）</button>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="static/app.js"></script>
+</body>
+</html>
